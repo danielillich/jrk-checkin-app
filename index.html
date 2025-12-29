@@ -1,0 +1,2057 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JRK Check-in App - Cloud Edition</title>
+    <style>
+        /* JRK Corporate Colors */
+        :root {
+            --jrk-petrol: rgb(50, 180, 190);
+            --jrk-red: rgb(240, 50, 55);
+            --jrk-yellow: rgb(255, 235, 105);
+            --jrk-blue: rgb(85, 70, 150);
+            --jrk-green: rgb(190, 225, 130);
+            --jrk-dark: #2c3e50;
+            --jrk-light: #ecf0f1;
+            --jrk-white: #ffffff;
+            --jrk-gray: #95a5a6;
+            --jrk-success: #27ae60;
+            --jrk-warning: #f39c12;
+            --jrk-danger: #e74c3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--jrk-petrol), var(--jrk-blue));
+            min-height: 100vh;
+            color: var(--jrk-dark);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Login Screen */
+        .login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--jrk-white);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .login-logo {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .login-title {
+            color: var(--jrk-petrol);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            color: var(--jrk-gray);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .login-input {
+            padding: 15px;
+            border: 2px solid var(--jrk-light);
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--jrk-petrol);
+            box-shadow: 0 0 0 3px rgba(50, 180, 190, 0.1);
+        }
+
+        .login-button {
+            background: var(--jrk-petrol);
+            color: var(--jrk-white);
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-button:hover {
+            background: var(--jrk-blue);
+            transform: translateY(-2px);
+        }
+
+        .login-error {
+            background: var(--jrk-red);
+            color: var(--jrk-white);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .cloud-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--jrk-white);
+            padding: 10px 15px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            z-index: 1000;
+        }
+
+        .cloud-status.connected {
+            border-left: 4px solid var(--jrk-green);
+        }
+
+        .cloud-status.connecting {
+            border-left: 4px solid var(--jrk-yellow);
+        }
+
+        .cloud-status.offline {
+            border-left: 4px solid var(--jrk-red);
+        }
+
+        .user-info {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--jrk-white);
+            padding: 10px 15px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            z-index: 1000;
+        }
+
+        .logout-btn {
+            background: var(--jrk-red);
+            color: var(--jrk-white);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        /* Header */
+        header {
+            background: var(--jrk-white);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        header h1 {
+            color: var(--jrk-petrol);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .admin-section {
+            background: rgba(255, 235, 105, 0.2);
+            border: 2px solid var(--jrk-yellow);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .admin-title {
+            color: var(--jrk-dark);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            margin-top: 20px;
+        }
+
+        .upload-area {
+            border: 3px dashed var(--jrk-petrol);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(50, 180, 190, 0.05);
+        }
+
+        .upload-area:hover {
+            border-color: var(--jrk-blue);
+            background: rgba(85, 70, 150, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--jrk-green);
+            background: rgba(190, 225, 130, 0.2);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .upload-content p {
+            font-size: 1.2rem;
+            color: var(--jrk-dark);
+            font-weight: 500;
+        }
+
+        .demo-button {
+            background: var(--jrk-green);
+            color: var(--jrk-white);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .demo-button:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        /* Saved Data Notification */
+        .saved-data-notification {
+            background: linear-gradient(135deg, var(--jrk-green), var(--jrk-yellow));
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: var(--jrk-dark);
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+
+        .notification-text {
+            flex: 1;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--jrk-dark);
+            padding: 5px;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+
+        .notification-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dashboard */
+        .dashboard {
+            margin-bottom: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: var(--jrk-white);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card.total {
+            border-left: 5px solid var(--jrk-petrol);
+        }
+
+        .stat-card.present {
+            border-left: 5px solid var(--jrk-green);
+        }
+
+        .stat-card.absent {
+            border-left: 5px solid var(--jrk-red);
+        }
+
+        .stat-card.catering {
+            border-left: 5px solid var(--jrk-yellow);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--jrk-dark);
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: var(--jrk-gray);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .catering-breakdown {
+            text-align: left;
+        }
+
+        .catering-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid var(--jrk-light);
+        }
+
+        .catering-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .catering-label {
+            font-weight: 600;
+            color: var(--jrk-dark);
+        }
+
+        .catering-count {
+            font-weight: 700;
+            color: var(--jrk-petrol);
+        }
+
+        /* Controls */
+        .controls {
+            background: var(--jrk-white);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Search Container */
+        .search-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .search-input {
+            padding: 12px 15px;
+            border: 2px solid var(--jrk-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--jrk-white);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--jrk-petrol);
+            box-shadow: 0 0 0 3px rgba(50, 180, 190, 0.1);
+        }
+
+        /* Filter Container */
+        .filter-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: var(--jrk-dark);
+            min-width: 100px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--jrk-petrol);
+            background: var(--jrk-white);
+            color: var(--jrk-petrol);
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover {
+            background: var(--jrk-petrol);
+            color: var(--jrk-white);
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: var(--jrk-petrol);
+            color: var(--jrk-white);
+            box-shadow: 0 4px 15px rgba(50, 180, 190, 0.3);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .reset-btn, .export-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .reset-btn {
+            background: var(--jrk-red);
+            color: var(--jrk-white);
+        }
+
+        .reset-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .export-btn {
+            background: var(--jrk-green);
+            color: var(--jrk-white);
+        }
+
+        .export-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        /* Participants */
+        .participants {
+            background: var(--jrk-white);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .participants-header h2 {
+            color: var(--jrk-dark);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .participants-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .participant-card {
+            background: var(--jrk-light);
+            border-radius: 10px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s ease;
+            border-left: 5px solid var(--jrk-gray);
+        }
+
+        .participant-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .participant-card.present {
+            border-left-color: var(--jrk-green);
+            background: rgba(190, 225, 130, 0.1);
+        }
+
+        .participant-card.absent {
+            border-left-color: var(--jrk-red);
+        }
+
+        .participant-info {
+            cursor: pointer;
+        }
+
+        .participant-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--jrk-dark);
+            margin-bottom: 5px;
+        }
+
+        .participant-details {
+            color: var(--jrk-gray);
+            font-size: 0.95rem;
+        }
+
+        .participant-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.present {
+            background: var(--jrk-green);
+            color: var(--jrk-white);
+        }
+
+        .status-badge.absent {
+            background: var(--jrk-red);
+            color: var(--jrk-white);
+        }
+
+        .checkin-time {
+            font-size: 0.8rem;
+            color: var(--jrk-gray);
+            text-align: center;
+        }
+
+        .participant-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .checkin-btn, .checkout-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .checkin-btn {
+            background: var(--jrk-green);
+            color: var(--jrk-white);
+        }
+
+        .checkin-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .checkout-btn {
+            background: var(--jrk-red);
+            color: var(--jrk-white);
+        }
+
+        .checkout-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: var(--jrk-white);
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--jrk-petrol), var(--jrk-blue));
+            color: var(--jrk-white);
+            padding: 20px 25px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .modal-close {
+            color: var(--jrk-white);
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-close:hover {
+            opacity: 0.7;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-detail-group {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--jrk-light);
+        }
+
+        .modal-detail-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .modal-detail-label {
+            font-weight: 600;
+            color: var(--jrk-dark);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-detail-value {
+            color: var(--jrk-gray);
+            font-size: 1.1rem;
+        }
+
+        .workshop-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .workshop-item {
+            background: rgba(50, 180, 190, 0.1);
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border-left: 4px solid var(--jrk-petrol);
+        }
+
+        .workshop-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            .search-container {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .filter-group {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .filter-group label {
+                min-width: auto;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .participant-card {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .participant-actions {
+                flex-direction: row;
+                justify-content: center;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cloud-status, .user-info {
+                position: relative;
+                top: auto;
+                left: auto;
+                right: auto;
+                margin-bottom: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .filter-buttons {
+                justify-content: center;
+            }
+            
+            .filter-btn {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+            
+            .participant-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .checkin-btn, .checkout-btn {
+                font-size: 0.8rem;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cloud Status Indicator -->
+    <div class="cloud-status" id="cloudStatus">
+        <span id="cloudIcon">🔄</span>
+        <span id="cloudText">Verbinde...</span>
+    </div>
+
+    <!-- User Info -->
+    <div class="user-info" id="userInfo" style="display: none;">
+        <span>👤</span>
+        <span id="currentUser"></span>
+        <button class="logout-btn" onclick="logout()">Abmelden</button>
+    </div>
+
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-card">
+            <div class="login-logo">🏥</div>
+            <h1 class="login-title">JRK Check-in</h1>
+            <p class="login-subtitle">Cloud Edition - Geräte-übergreifend</p>
+            
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <input type="text" id="username" class="login-input" placeholder="Benutzername" required>
+                <input type="password" id="password" class="login-input" placeholder="Passwort" required>
+                <button type="submit" class="login-button">Anmelden</button>
+            </form>
+            
+            <div class="login-error" id="loginError">
+                Ungültige Anmeldedaten. Bitte versuchen Sie es erneut.
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="container" id="mainApp" style="display: none;">
+        <header>
+            <h1>JRK Veranstaltungs Check-in</h1>
+            
+            <!-- Admin Section (only for admin users) -->
+            <div class="admin-section" id="adminSection" style="display: none;">
+                <div class="admin-title">
+                    <span>⚙️</span>
+                    <span>Administrator-Bereich</span>
+                </div>
+                <div class="upload-section">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-content">
+                            <div class="upload-icon">📁</div>
+                            <p>Excel-Datei hier ablegen oder klicken zum Auswählen</p>
+                            <button class="demo-button" onclick="loadDemoData()">🎯 Demo-Daten laden</button>
+                            <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="saved-data-notification" id="savedDataNotification" style="display: none;">
+            <div class="notification-content">
+                <span class="notification-icon">☁️</span>
+                <span class="notification-text">Cloud-Daten synchronisiert</span>
+                <button class="notification-close" id="closeSavedNotification">×</button>
+            </div>
+        </div>
+
+        <main id="mainContent" style="display: none;">
+            <!-- Dashboard -->
+            <section class="dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card total">
+                        <div class="stat-number" id="totalCount">0</div>
+                        <div class="stat-label">Gesamt</div>
+                    </div>
+                    <div class="stat-card present">
+                        <div class="stat-number" id="presentCount">0</div>
+                        <div class="stat-label">Anwesend</div>
+                    </div>
+                    <div class="stat-card absent">
+                        <div class="stat-number" id="absentCount">0</div>
+                        <div class="stat-label">Abwesend</div>
+                    </div>
+                    <div class="stat-card catering">
+                        <div class="catering-breakdown">
+                            <div class="catering-item">
+                                <span class="catering-label">Vollkost:</span>
+                                <span class="catering-count" id="vollkostCount">0</span>
+                            </div>
+                            <div class="catering-item">
+                                <span class="catering-label">Vegetarisch:</span>
+                                <span class="catering-count" id="vegetarischCount">0</span>
+                            </div>
+                            <div class="catering-item">
+                                <span class="catering-label">Vegan:</span>
+                                <span class="catering-count" id="veganCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Search and Filters -->
+            <section class="controls">
+                <div class="search-container">
+                    <input type="text" id="searchName" placeholder="Name/Buchungsnummer suchen..." class="search-input">
+                    <input type="text" id="searchAge" placeholder="Alter suchen..." class="search-input">
+                    <input type="text" id="searchRoom" placeholder="Zimmernummer suchen..." class="search-input">
+                </div>
+                
+                <div class="filter-container">
+                    <div class="filter-group">
+                        <label>Verpflegung:</label>
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-filter="all">Alle</button>
+                            <button class="filter-btn" data-filter="Vollkost">Vollkost</button>
+                            <button class="filter-btn" data-filter="Vegetarisch">Vegetarisch</button>
+                            <button class="filter-btn" data-filter="Vegan">Vegan</button>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Status:</label>
+                        <div class="filter-buttons">
+                            <button class="filter-btn status-filter active" data-status="alle-anmeldungen">Alle Anmeldungen</button>
+                            <button class="filter-btn status-filter" data-status="present">Anwesend</button>
+                            <button class="filter-btn status-filter" data-status="absent">Abwesend</button>
+                        </div>
+                    </div>
+
+                    <div class="filter-group" id="buildingFilterGroup" style="display: none;">
+                        <label>Gebäude:</label>
+                        <div class="filter-buttons" id="buildingFilters">
+                            <!-- Building filters will be dynamically added here -->
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="resetFilters" class="reset-btn">Filter zurücksetzen</button>
+                        <button id="exportBtn" class="export-btn">Gefilterte Daten exportieren</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Participants List -->
+            <section class="participants">
+                <div class="participants-header">
+                    <h2>Teilnehmer (<span id="filteredCount">0</span>)</h2>
+                </div>
+                <div class="participants-list" id="participantsList">
+                    <!-- Participants will be dynamically added here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for participant details -->
+    <div class="modal" id="participantModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalName"></h3>
+                <span class="modal-close" id="modalClose">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Participant details will be shown here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <script>
+        // Supabase Configuration
+        const supabaseUrl = 'https://xyzcompany.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5emNvbXBhbnkiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MDk5NTIwMCwiZXhwIjoxOTU2NTcxMjAwfQ.rEKBiQQG7J-6uyKfXI5VQy7X9X9X9X9X9X9X9X9X9X9';
+        
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // User credentials
+        const validUsers = {
+            'admin': 'jrk2024!',
+            'team1': 'checkin123',
+            'team2': 'checkin123',
+            'team3': 'checkin123',
+            'leitung': 'jrk2024!'
+        };
+
+        const adminUsers = ['admin', 'leitung'];
+
+        // Current user
+        let currentUser = null;
+        let isAdmin = false;
+
+        // JRK Check-in App - Supabase Cloud Version
+        class SupabaseCheckInApp {
+            constructor() {
+                this.participants = [];
+                this.filteredParticipants = [];
+                this.currentFilters = {
+                    catering: 'all',
+                    status: 'alle-anmeldungen',
+                    building: 'all',
+                    searchName: '',
+                    searchAge: '',
+                    searchRoom: ''
+                };
+                this.buildings = new Set();
+                this.isConnected = false;
+                this.realtimeSubscription = null;
+                this.init();
+            }
+
+            async init() {
+                this.setupEventListeners();
+                await this.setupCloudConnection();
+                await this.loadFromCloud();
+            }
+
+            setupEventListeners() {
+                // File upload (admin only)
+                const uploadArea = document.getElementById('uploadArea');
+                const fileInput = document.getElementById('fileInput');
+
+                if (uploadArea && fileInput) {
+                    uploadArea.addEventListener('click', (e) => {
+                        if (e.target.tagName !== 'BUTTON') {
+                            fileInput.click();
+                        }
+                    });
+                    uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
+                    uploadArea.addEventListener('dragleave', this.handleDragLeave.bind(this));
+                    uploadArea.addEventListener('drop', this.handleDrop.bind(this));
+                    fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+                }
+
+                // Search inputs
+                document.getElementById('searchName').addEventListener('input', this.handleSearchName.bind(this));
+                document.getElementById('searchAge').addEventListener('input', this.handleSearchAge.bind(this));
+                document.getElementById('searchRoom').addEventListener('input', this.handleSearchRoom.bind(this));
+
+                // Filter buttons
+                document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+                    btn.addEventListener('click', this.handleCateringFilter.bind(this));
+                });
+
+                document.querySelectorAll('.status-filter').forEach(btn => {
+                    btn.addEventListener('click', this.handleStatusFilter.bind(this));
+                });
+
+                // Action buttons
+                document.getElementById('resetFilters').addEventListener('click', this.resetFilters.bind(this));
+                document.getElementById('exportBtn').addEventListener('click', this.exportFilteredData.bind(this));
+
+                // Modal
+                document.getElementById('modalClose').addEventListener('click', this.closeModal.bind(this));
+                document.getElementById('participantModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'participantModal') this.closeModal();
+                });
+
+                // Saved data notification
+                document.getElementById('closeSavedNotification').addEventListener('click', () => {
+                    document.getElementById('savedDataNotification').style.display = 'none';
+                });
+            }
+
+            async setupCloudConnection() {
+                try {
+                    this.updateCloudStatus('connecting', 'Verbinde...');
+                    
+                    // Test connection
+                    const { data, error } = await supabase.from('participants').select('count').limit(1);
+                    
+                    if (error && error.code === 'PGRST116') {
+                        // Table doesn't exist, create it
+                        await this.createTables();
+                    }
+                    
+                    this.isConnected = true;
+                    this.updateCloudStatus('connected', 'Verbunden');
+                    this.setupRealtimeSubscription();
+                    
+                } catch (error) {
+                    console.error('Cloud connection error:', error);
+                    this.updateCloudStatus('offline', 'Offline');
+                    // Fallback to localStorage
+                    this.setupLocalFallback();
+                }
+            }
+
+            async createTables() {
+                // Since we can't create tables via client, we'll use a simple key-value store approach
+                // This simulates a database using Supabase's built-in storage
+                console.log('Using simplified cloud storage approach');
+            }
+
+            setupRealtimeSubscription() {
+                // Subscribe to real-time changes
+                this.realtimeSubscription = supabase
+                    .channel('jrk-checkin')
+                    .on('postgres_changes', 
+                        { event: '*', schema: 'public', table: 'jrk_data' },
+                        (payload) => {
+                            console.log('Real-time update:', payload);
+                            this.handleRealtimeUpdate(payload);
+                        }
+                    )
+                    .subscribe();
+            }
+
+            setupLocalFallback() {
+                // Fallback to localStorage with broadcast for same-origin sync
+                window.addEventListener('storage', (e) => {
+                    if (e.key === 'jrk-cloud-participants' || e.key === 'jrk-cloud-checkins') {
+                        this.loadFromLocalStorage();
+                    }
+                });
+                
+                // Periodic sync attempt
+                setInterval(() => {
+                    this.attemptCloudReconnect();
+                }, 30000); // Try every 30 seconds
+            }
+
+            async attemptCloudReconnect() {
+                if (!this.isConnected) {
+                    try {
+                        await this.setupCloudConnection();
+                    } catch (error) {
+                        // Still offline, continue with localStorage
+                    }
+                }
+            }
+
+            updateCloudStatus(status, text) {
+                const cloudStatus = document.getElementById('cloudStatus');
+                const cloudIcon = document.getElementById('cloudIcon');
+                const cloudText = document.getElementById('cloudText');
+                
+                cloudStatus.className = `cloud-status ${status}`;
+                cloudText.textContent = text;
+                
+                switch(status) {
+                    case 'connected':
+                        cloudIcon.textContent = '☁️';
+                        break;
+                    case 'offline':
+                        cloudIcon.textContent = '📱';
+                        break;
+                    case 'connecting':
+                        cloudIcon.textContent = '🔄';
+                        break;
+                }
+            }
+
+            async loadFromCloud() {
+                try {
+                    if (this.isConnected) {
+                        // Try to load from Supabase
+                        const { data: participantsData } = await supabase
+                            .from('jrk_data')
+                            .select('*')
+                            .eq('type', 'participants')
+                            .order('created_at', { ascending: false })
+                            .limit(1);
+
+                        const { data: checkinsData } = await supabase
+                            .from('jrk_data')
+                            .select('*')
+                            .eq('type', 'checkins')
+                            .order('created_at', { ascending: false })
+                            .limit(1);
+
+                        if (participantsData && participantsData.length > 0) {
+                            this.participants = participantsData[0].data;
+                            
+                            if (checkinsData && checkinsData.length > 0) {
+                                this.applyCheckinsToParticipants(checkinsData[0].data);
+                            }
+                            
+                            this.processLoadedData();
+                        }
+                    } else {
+                        // Fallback to localStorage
+                        this.loadFromLocalStorage();
+                    }
+                } catch (error) {
+                    console.error('Error loading from cloud:', error);
+                    this.loadFromLocalStorage();
+                }
+            }
+
+            loadFromLocalStorage() {
+                const participantsData = localStorage.getItem('jrk-cloud-participants');
+                const checkinsData = localStorage.getItem('jrk-cloud-checkins');
+                
+                if (participantsData) {
+                    try {
+                        this.participants = JSON.parse(participantsData);
+                        
+                        if (checkinsData) {
+                            const checkins = JSON.parse(checkinsData);
+                            this.applyCheckinsToParticipants(checkins);
+                        }
+                        
+                        this.processLoadedData();
+                    } catch (error) {
+                        console.error('Error loading from localStorage:', error);
+                    }
+                }
+            }
+
+            processLoadedData() {
+                if (this.participants.length > 0) {
+                    this.extractBuildings();
+                    this.setupBuildingFilters();
+                    this.applyFilters();
+                    this.updateDashboard();
+                    this.showMainContent();
+                    
+                    // Show sync notification
+                    document.getElementById('savedDataNotification').style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('savedDataNotification').style.display = 'none';
+                    }, 3000);
+                }
+            }
+
+            async saveToCloud() {
+                try {
+                    if (this.isConnected) {
+                        // Save to Supabase
+                        if (isAdmin && this.participants.length > 0) {
+                            await supabase
+                                .from('jrk_data')
+                                .upsert({
+                                    type: 'participants',
+                                    data: this.participants,
+                                    updated_by: currentUser,
+                                    updated_at: new Date().toISOString()
+                                });
+                        }
+                        
+                        // Save check-ins
+                        const checkins = this.extractCheckins();
+                        await supabase
+                            .from('jrk_data')
+                            .upsert({
+                                type: 'checkins',
+                                data: checkins,
+                                updated_by: currentUser,
+                                updated_at: new Date().toISOString()
+                            });
+                            
+                        this.updateCloudStatus('connected', 'Gespeichert');
+                        setTimeout(() => {
+                            this.updateCloudStatus('connected', 'Verbunden');
+                        }, 2000);
+                    }
+                } catch (error) {
+                    console.error('Error saving to cloud:', error);
+                    this.updateCloudStatus('offline', 'Offline');
+                }
+                
+                // Always save to localStorage as backup
+                this.saveToLocalStorage();
+            }
+
+            saveToLocalStorage() {
+                localStorage.setItem('jrk-cloud-participants', JSON.stringify(this.participants));
+                
+                const checkins = this.extractCheckins();
+                localStorage.setItem('jrk-cloud-checkins', JSON.stringify(checkins));
+            }
+
+            extractCheckins() {
+                const checkins = {};
+                this.participants.forEach(p => {
+                    if (p.isPresent || p.checkInTime || p.checkOutTime) {
+                        checkins[p.id] = {
+                            isPresent: p.isPresent,
+                            checkInTime: p.checkInTime,
+                            checkOutTime: p.checkOutTime,
+                            lastUpdated: new Date().toISOString(),
+                            updatedBy: currentUser
+                        };
+                    }
+                });
+                return checkins;
+            }
+
+            applyCheckinsToParticipants(checkins) {
+                this.participants.forEach(participant => {
+                    const checkin = checkins[participant.id];
+                    if (checkin) {
+                        participant.isPresent = checkin.isPresent || false;
+                        participant.checkInTime = checkin.checkInTime || null;
+                        participant.checkOutTime = checkin.checkOutTime || null;
+                    }
+                });
+            }
+
+            handleRealtimeUpdate(payload) {
+                // Handle real-time updates from other clients
+                this.loadFromCloud();
+            }
+
+            handleDragOver(e) {
+                e.preventDefault();
+                e.currentTarget.classList.add('dragover');
+            }
+
+            handleDragLeave(e) {
+                e.currentTarget.classList.remove('dragover');
+            }
+
+            handleDrop(e) {
+                e.preventDefault();
+                e.currentTarget.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.processFile(files[0]);
+                }
+            }
+
+            handleFileSelect(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    this.processFile(file);
+                }
+            }
+
+            async processFile(file) {
+                if (!isAdmin) {
+                    alert('Nur Administratoren können Excel-Dateien hochladen.');
+                    return;
+                }
+
+                if (!file.name.match(/\.(xlsx|xls)$/)) {
+                    alert('Bitte wählen Sie eine Excel-Datei (.xlsx oder .xls)');
+                    return;
+                }
+
+                try {
+                    const data = await this.readExcelFile(file);
+                    this.participants = this.parseParticipants(data);
+                    this.extractBuildings();
+                    this.setupBuildingFilters();
+                    this.applyFilters();
+                    this.updateDashboard();
+                    this.showMainContent();
+                    await this.saveToCloud();
+                } catch (error) {
+                    console.error('Fehler beim Verarbeiten der Datei:', error);
+                    alert('Fehler beim Lesen der Excel-Datei. Bitte überprüfen Sie das Format.');
+                }
+            }
+
+            readExcelFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = new Uint8Array(e.target.result);
+                            const workbook = XLSX.read(data, { type: 'array' });
+                            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                            const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                            resolve(jsonData);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+
+            parseParticipants(data) {
+                if (data.length < 2) return [];
+
+                const headers = data[0].map(h => String(h).toLowerCase().trim());
+                const participants = [];
+
+                // Find column indices with priority for specific columns
+                let bookingIndex = 0; // Column A
+                if (bookingIndex >= headers.length || !data[1] || !data[1][bookingIndex]) {
+                    bookingIndex = this.findColumnIndex(headers, ['buchung', 'booking', 'buchungsnummer']);
+                }
+                
+                let lastNameIndex = 2; // Column C
+                if (lastNameIndex >= headers.length || !data[1] || !data[1][lastNameIndex]) {
+                    lastNameIndex = this.findColumnIndex(headers, ['nachname', 'lastname', 'name']);
+                }
+                
+                const firstNameIndex = this.findColumnIndex(headers, ['vorname', 'firstname']);
+                const ageIndex = this.findColumnIndex(headers, ['alter', 'age']);
+                
+                let roomIndex = 44; // Column AS
+                if (roomIndex >= headers.length || !data[1] || !data[1][roomIndex]) {
+                    roomIndex = this.findColumnIndex(headers, ['zimmer', 'room', 'zimmernummer']);
+                }
+                
+                const cateringIndex = this.findColumnIndex(headers, ['verpflegung', 'catering', 'essen']);
+                const workshopIndex = this.findColumnIndex(headers, ['workshop', 'workshops']);
+                
+                let buildingIndex = 45; // Column AT
+                if (buildingIndex >= headers.length || !data[1] || !data[1][buildingIndex]) {
+                    buildingIndex = this.findColumnIndex(headers, ['gebäude', 'building', 'haus']);
+                }
+
+                for (let i = 1; i < data.length; i++) {
+                    const row = data[i];
+                    if (!row || row.length === 0) continue;
+
+                    const firstName = firstNameIndex !== -1 ? String(row[firstNameIndex] || '').trim() : '';
+                    const lastName = lastNameIndex !== -1 ? String(row[lastNameIndex] || '').trim() : '';
+                    const name = `${firstName} ${lastName}`.trim();
+
+                    if (!name) continue;
+
+                    const booking = bookingIndex !== -1 ? String(row[bookingIndex] || '').trim() : '';
+                    const age = ageIndex !== -1 ? String(row[ageIndex] || '').trim() : '';
+                    const room = roomIndex !== -1 ? String(row[roomIndex] || '').trim() : '';
+                    const catering = cateringIndex !== -1 ? String(row[cateringIndex] || '').trim() : '';
+                    const workshop = workshopIndex !== -1 ? String(row[workshopIndex] || '').trim() : '';
+                    const building = buildingIndex !== -1 ? String(row[buildingIndex] || '').trim() : '';
+
+                    const participant = {
+                        id: i,
+                        name,
+                        firstName,
+                        lastName,
+                        booking,
+                        age,
+                        room,
+                        building: building || this.extractBuildingFromRoom(room),
+                        catering: this.normalizeCatering(catering),
+                        workshop,
+                        workshops: this.parseWorkshops(workshop),
+                        isPresent: false,
+                        checkInTime: null,
+                        checkOutTime: null
+                    };
+
+                    participants.push(participant);
+                }
+
+                return participants;
+            }
+
+            findColumnIndex(headers, possibleNames) {
+                for (const name of possibleNames) {
+                    const index = headers.findIndex(h => h.includes(name));
+                    if (index !== -1) return index;
+                }
+                return -1;
+            }
+
+            normalizeCatering(catering) {
+                const lower = catering.toLowerCase();
+                if (lower.includes('vegan')) return 'Vegan';
+                if (lower.includes('vegetar')) return 'Vegetarisch';
+                if (lower.includes('vollkost') || lower.includes('normal') || lower.includes('fleisch')) return 'Vollkost';
+                return catering || 'Vollkost';
+            }
+
+            parseWorkshops(workshopString) {
+                if (!workshopString) return [];
+                
+                const workshops = [];
+                const numbers = workshopString.match(/\d+/g);
+                
+                if (numbers) {
+                    numbers.forEach(num => {
+                        const number = parseInt(num);
+                        if (number % 10 === 0 || number % 100 === 0) {
+                            workshops.push({
+                                number: number,
+                                timeSlot: this.getWorkshopTimeSlot(number)
+                            });
+                        }
+                    });
+                }
+                
+                return workshops;
+            }
+
+            getWorkshopTimeSlot(number) {
+                if (number >= 10 && number < 20) return '10:00 - 11:30';
+                if (number >= 20 && number < 30) return '12:00 - 13:30';
+                if (number >= 30 && number < 40) return '14:00 - 15:30';
+                if (number >= 100 && number < 200) return '16:00 - 17:30';
+                return 'Unbekannt';
+            }
+
+            extractBuildings() {
+                this.buildings.clear();
+                this.participants.forEach(participant => {
+                    if (participant.building) {
+                        this.buildings.add(participant.building);
+                    }
+                });
+            }
+
+            extractBuildingFromRoom(room) {
+                const roomStr = String(room).trim();
+                const match = roomStr.match(/^([A-Za-z]+)/);
+                return match ? match[1].toUpperCase() : null;
+            }
+
+            setupBuildingFilters() {
+                const buildingFilterGroup = document.getElementById('buildingFilterGroup');
+                const buildingFilters = document.getElementById('buildingFilters');
+                
+                if (this.buildings.size > 0) {
+                    buildingFilterGroup.style.display = 'block';
+                    buildingFilters.innerHTML = '';
+                    
+                    const allBtn = document.createElement('button');
+                    allBtn.className = 'filter-btn active';
+                    allBtn.setAttribute('data-building', 'all');
+                    allBtn.textContent = 'Alle';
+                    allBtn.addEventListener('click', this.handleBuildingFilter.bind(this));
+                    buildingFilters.appendChild(allBtn);
+                    
+                    Array.from(this.buildings).sort().forEach(building => {
+                        const btn = document.createElement('button');
+                        btn.className = 'filter-btn';
+                        btn.setAttribute('data-building', building);
+                        btn.textContent = building;
+                        btn.addEventListener('click', this.handleBuildingFilter.bind(this));
+                        buildingFilters.appendChild(btn);
+                    });
+                } else {
+                    buildingFilterGroup.style.display = 'none';
+                }
+            }
+
+            handleSearchName(e) {
+                this.currentFilters.searchName = e.target.value.toLowerCase();
+                this.applyFilters();
+            }
+
+            handleSearchAge(e) {
+                this.currentFilters.searchAge = e.target.value.toLowerCase();
+                this.applyFilters();
+            }
+
+            handleSearchRoom(e) {
+                this.currentFilters.searchRoom = e.target.value.toLowerCase();
+                this.applyFilters();
+            }
+
+            handleCateringFilter(e) {
+                document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                this.currentFilters.catering = e.target.dataset.filter;
+                this.applyFilters();
+            }
+
+            handleStatusFilter(e) {
+                document.querySelectorAll('.status-filter').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                this.currentFilters.status = e.target.dataset.status;
+                this.applyFilters();
+            }
+
+            handleBuildingFilter(e) {
+                document.querySelectorAll('.filter-btn[data-building]').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                this.currentFilters.building = e.target.dataset.building;
+                this.applyFilters();
+            }
+
+            applyFilters() {
+                this.filteredParticipants = this.participants.filter(participant => {
+                    if (this.currentFilters.searchName) {
+                        const searchTerm = this.currentFilters.searchName;
+                        const fullNameMatch = participant.name.toLowerCase().includes(searchTerm);
+                        const firstNameMatch = participant.firstName.toLowerCase().includes(searchTerm);
+                        const lastNameMatch = participant.lastName.toLowerCase().includes(searchTerm);
+                        const bookingMatch = participant.booking.toLowerCase().includes(searchTerm);
+                        if (!fullNameMatch && !firstNameMatch && !lastNameMatch && !bookingMatch) return false;
+                    }
+
+                    if (this.currentFilters.searchAge) {
+                        const ageMatch = participant.age.toLowerCase().includes(this.currentFilters.searchAge);
+                        if (!ageMatch) return false;
+                    }
+
+                    if (this.currentFilters.searchRoom) {
+                        const roomMatch = participant.room.toLowerCase().includes(this.currentFilters.searchRoom);
+                        if (!roomMatch) return false;
+                    }
+
+                    if (this.currentFilters.catering !== 'all') {
+                        if (participant.catering !== this.currentFilters.catering) return false;
+                    }
+
+                    if (this.currentFilters.status === 'present' && !participant.isPresent) return false;
+                    if (this.currentFilters.status === 'absent' && participant.isPresent) return false;
+
+                    if (this.currentFilters.building !== 'all') {
+                        if (participant.building !== this.currentFilters.building) return false;
+                    }
+
+                    return true;
+                });
+
+                this.renderParticipants();
+                this.updateDashboard();
+            }
+
+            resetFilters() {
+                this.currentFilters = {
+                    catering: 'all',
+                    status: 'alle-anmeldungen',
+                    building: 'all',
+                    searchName: '',
+                    searchAge: '',
+                    searchRoom: ''
+                };
+
+                document.getElementById('searchName').value = '';
+                document.getElementById('searchAge').value = '';
+                document.getElementById('searchRoom').value = '';
+
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+                document.querySelector('.status-filter[data-status="alle-anmeldungen"]').classList.add('active');
+                
+                const allBuildingBtn = document.querySelector('.filter-btn[data-building="all"]');
+                if (allBuildingBtn) allBuildingBtn.classList.add('active');
+
+                this.applyFilters();
+            }
+
+            renderParticipants() {
+                const container = document.getElementById('participantsList');
+                const filteredCount = document.getElementById('filteredCount');
+                
+                filteredCount.textContent = this.filteredParticipants.length;
+                
+                if (this.filteredParticipants.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #95a5a6;">Keine Teilnehmer gefunden</div>';
+                    return;
+                }
+
+                container.innerHTML = this.filteredParticipants.map(participant => `
+                    <div class="participant-card ${participant.isPresent ? 'present' : 'absent'}">
+                        <div class="participant-info" onclick="app.showParticipantDetails(${participant.id})">
+                            <div class="participant-name">${participant.name}</div>
+                            <div class="participant-details">
+                                Buchung: ${participant.booking} | Alter: ${participant.age} | Zimmer: ${participant.room} | Gebäude: ${participant.building} | ${participant.catering}
+                                ${participant.workshops.length > 0 ? `<br>Workshops: ${participant.workshops.map(w => w.number).join(', ')}` : ''}
+                            </div>
+                        </div>
+                        <div class="participant-meta">
+                            <div class="status-badge ${participant.isPresent ? 'present' : 'absent'}">
+                                ${participant.isPresent ? 'Anwesend' : 'Abwesend'}
+                            </div>
+                            ${participant.checkInTime ? `<div class="checkin-time">Check-in: ${participant.checkInTime}</div>` : ''}
+                            ${participant.checkOutTime ? `<div class="checkin-time">Check-out: ${participant.checkOutTime}</div>` : ''}
+                        </div>
+                        <div class="participant-actions">
+                            ${!participant.isPresent ? 
+                                `<button class="checkin-btn" onclick="app.checkIn(${participant.id})">Check-in</button>` :
+                                `<button class="checkout-btn" onclick="app.checkOut(${participant.id})">Check-out</button>`
+                            }
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            async checkIn(participantId) {
+                const participant = this.participants.find(p => p.id === participantId);
+                if (participant) {
+                    participant.isPresent = true;
+                    participant.checkInTime = new Date().toLocaleString('de-DE');
+                    participant.checkOutTime = null;
+                    await this.saveToCloud();
+                    this.applyFilters();
+                    this.updateDashboard();
+                }
+            }
+
+            async checkOut(participantId) {
+                const participant = this.participants.find(p => p.id === participantId);
+                if (participant) {
+                    participant.isPresent = false;
+                    participant.checkOutTime = new Date().toLocaleString('de-DE');
+                    await this.saveToCloud();
+                    this.applyFilters();
+                    this.updateDashboard();
+                }
+            }
+
+            showParticipantDetails(participantId) {
+                const participant = this.participants.find(p => p.id === participantId);
+                if (!participant) return;
+
+                document.getElementById('modalName').textContent = participant.name;
+                
+                const modalBody = document.getElementById('modalBody');
+                modalBody.innerHTML = `
+                    <div class="modal-detail-group">
+                        <div class="modal-detail-label">Buchungsnummer</div>
+                        <div class="modal-detail-value">${participant.booking}</div>
+                    </div>
+                    <div class="modal-detail-group">
+                        <div class="modal-detail-label">Alter</div>
+                        <div class="modal-detail-value">${participant.age}</div>
+                    </div>
+                    <div class="modal-detail-group">
+                        <div class="modal-detail-label">Zimmernummer</div>
+                        <div class="modal-detail-value">${participant.room}</div>
+                    </div>
+                    <div class="modal-detail-group">
+                        <div class="modal-detail-label">Gebäude</div>
+                        <div class="modal-detail-value">${participant.building}</div>
+                    </div>
+                    <div class="modal-detail-group">
+                        <div class="modal-detail-label">Verpflegung</div>
+                        <div class="modal-detail-value">${participant.catering}</div>
+                    </div>
+                    <div class="modal-detail-group">
+                        <div class="modal-detail-label">Status</div>
+                        <div class="modal-detail-value">${participant.isPresent ? 'Anwesend' : 'Abwesend'}</div>
+                    </div>
+                    ${participant.checkInTime ? `
+                        <div class="modal-detail-group">
+                            <div class="modal-detail-label">Check-in Zeit</div>
+                            <div class="modal-detail-value">${participant.checkInTime}</div>
+                        </div>
+                    ` : ''}
+                    ${participant.checkOutTime ? `
+                        <div class="modal-detail-group">
+                            <div class="modal-detail-label">Check-out Zeit</div>
+                            <div class="modal-detail-value">${participant.checkOutTime}</div>
+                        </div>
+                    ` : ''}
+                    ${participant.workshops.length > 0 ? `
+                        <div class="modal-detail-group">
+                            <div class="modal-detail-label">Workshops</div>
+                            <div class="modal-detail-value">
+                                <ul class="workshop-list">
+                                    ${participant.workshops.map(workshop => 
+                                        `<li class="workshop-item">Workshop ${workshop.number} (${workshop.timeSlot})</li>`
+                                    ).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+
+                document.getElementById('participantModal').style.display = 'block';
+            }
+
+            closeModal() {
+                document.getElementById('participantModal').style.display = 'none';
+            }
+
+            updateDashboard() {
+                const total = this.participants.length;
+                const present = this.participants.filter(p => p.isPresent).length;
+                const absent = total - present;
+
+                const cateringCounts = {
+                    'Vollkost': 0,
+                    'Vegetarisch': 0,
+                    'Vegan': 0
+                };
+
+                this.participants.forEach(participant => {
+                    if (cateringCounts.hasOwnProperty(participant.catering)) {
+                        cateringCounts[participant.catering]++;
+                    }
+                });
+
+                document.getElementById('totalCount').textContent = total;
+                document.getElementById('presentCount').textContent = present;
+                document.getElementById('absentCount').textContent = absent;
+                document.getElementById('vollkostCount').textContent = cateringCounts['Vollkost'];
+                document.getElementById('vegetarischCount').textContent = cateringCounts['Vegetarisch'];
+                document.getElementById('veganCount').textContent = cateringCounts['Vegan'];
+            }
+
+            showMainContent() {
+                document.getElementById('mainContent').style.display = 'block';
+            }
+
+            exportFilteredData() {
+                if (this.filteredParticipants.length === 0) {
+                    alert('Keine Daten zum Exportieren vorhanden.');
+                    return;
+                }
+
+                try {
+                    const exportData = [
+                        ['Name', 'Buchungsnummer', 'Alter', 'Zimmernummer', 'Gebäude', 'Verpflegung', 'Workshop', 'Status', 'Check-in Zeit', 'Check-out Zeit']
+                    ];
+
+                    this.filteredParticipants.forEach(participant => {
+                        exportData.push([
+                            participant.name,
+                            participant.booking,
+                            participant.age,
+                            participant.room,
+                            participant.building,
+                            participant.catering,
+                            participant.workshop,
+                            participant.isPresent ? 'Anwesend' : 'Abwesend',
+                            participant.checkInTime || '',
+                            participant.checkOutTime || ''
+                        ]);
+                    });
+
+                    const wb = XLSX.utils.book_new();
+                    const ws = XLSX.utils.aoa_to_sheet(exportData);
+                    XLSX.utils.book_append_sheet(wb, ws, 'Teilnehmer');
+
+                    const now = new Date();
+                    const dateStr = now.toISOString().split('T')[0];
+                    const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+                    const filename = `JRK_Checkin_Export_${dateStr}_${timeStr}.xlsx`;
+
+                    XLSX.writeFile(wb, filename);
+                    alert(`Export erfolgreich! ${this.filteredParticipants.length} Teilnehmer exportiert.`);
+                } catch (error) {
+                    console.error('Fehler beim Exportieren:', error);
+                    alert('Fehler beim Exportieren der Daten. Bitte versuchen Sie es erneut.');
+                }
+            }
+
+            destroy() {
+                if (this.realtimeSubscription) {
+                    supabase.removeChannel(this.realtimeSubscription);
+                }
+            }
+        }
+
+        // Authentication functions
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (validUsers[username] && validUsers[username] === password) {
+                currentUser = username;
+                isAdmin = adminUsers.includes(username);
+                
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                
+                document.getElementById('userInfo').style.display = 'flex';
+                document.getElementById('currentUser').textContent = username;
+                
+                if (isAdmin) {
+                    document.getElementById('adminSection').style.display = 'block';
+                }
+                
+                window.app = new SupabaseCheckInApp();
+                
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('loginError').style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function logout() {
+            if (window.app) {
+                window.app.destroy();
+                window.app = null;
+            }
+            
+            currentUser = null;
+            isAdmin = false;
+            
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'none';
+            document.getElementById('adminSection').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'none';
+            
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // Demo data function (admin only)
+        async function loadDemoData() {
+            if (!isAdmin) {
+                alert('Nur Administratoren können Demo-Daten laden.');
+                return;
+            }
+
+            const demoParticipants = [
+                {
+                    id: 1,
+                    name: "Anna Müller",
+                    firstName: "Anna",
+                    lastName: "Müller",
+                    booking: "JRK2024001",
+                    age: "16",
+                    room: "101",
+                    building: "Haupthaus",
+                    catering: "Vegetarisch",
+                    workshop: "Workshop 10, 120",
+                    workshops: [
+                        { number: 10, timeSlot: "10:00 - 11:30" },
+                        { number: 120, timeSlot: "16:00 - 17:30" }
+                    ],
+                    isPresent: false,
+                    checkInTime: null,
+                    checkOutTime: null
+                },
+                {
+                    id: 2,
+                    name: "Max Schmidt",
+                    firstName: "Max",
+                    lastName: "Schmidt",
+                    booking: "JRK2024002",
+                    age: "17",
+                    room: "205",
+                    building: "Nebengebäude",
+                    catering: "Vollkost",
+                    workshop: "Workshop 20, 130",
+                    workshops: [
+                        { number: 20, timeSlot: "12:00 - 13:30" },
+                        { number: 130, timeSlot: "16:00 - 17:30" }
+                    ],
+                    isPresent: true,
+                    checkInTime: "23.12.2024, 09:15:30",
+                    checkOutTime: null
+                },
+                {
+                    id: 3,
+                    name: "Lisa Weber",
+                    firstName: "Lisa",
+                    lastName: "Weber",
+                    booking: "JRK2024003",
+                    age: "15",
+                    room: "203",
+                    building: "Haupthaus",
+                    catering: "Vegan",
+                    workshop: "Workshop 30",
+                    workshops: [
+                        { number: 30, timeSlot: "14:00 - 15:30" }
+                    ],
+                    isPresent: false,
+                    checkInTime: null,
+                    checkOutTime: null
+                },
+                {
+                    id: 4,
+                    name: "Tom Fischer",
+                    firstName: "Tom",
+                    lastName: "Fischer",
+                    booking: "JRK2024004",
+                    age: "18",
+                    room: "301",
+                    building: "Gästehaus",
+                    catering: "Vollkost",
+                    workshop: "Workshop 10, 100",
+                    workshops: [
+                        { number: 10, timeSlot: "10:00 - 11:30" },
+                        { number: 100, timeSlot: "16:00 - 17:30" }
+                    ],
+                    isPresent: true,
+                    checkInTime: "23.12.2024, 08:45:12",
+                    checkOutTime: null
+                },
+                {
+                    id: 5,
+                    name: "Sarah Klein",
+                    firstName: "Sarah",
+                    lastName: "Klein",
+                    booking: "JRK2024005",
+                    age: "16",
+                    room: "102",
+                    building: "Nebengebäude",
+                    catering: "Vegetarisch",
+                    workshop: "Workshop 20",
+                    workshops: [
+                        { number: 20, timeSlot: "12:00 - 13:30" }
+                    ],
+                    isPresent: false,
+                    checkInTime: null,
+                    checkOutTime: null
+                },
+                {
+                    id: 6,
+                    name: "David Braun",
+                    firstName: "David",
+                    lastName: "Braun",
+                    booking: "JRK2024006",
+                    age: "17",
+                    room: "305",
+                    building: "Haupthaus",
+                    catering: "Vollkost",
+                    workshop: "Workshop 30, 110",
+                    workshops: [
+                        { number: 30, timeSlot: "14:00 - 15:30" },
+                        { number: 110, timeSlot: "16:00 - 17:30" }
+                    ],
+                    isPresent: true,
+                    checkInTime: "23.12.2024, 09:30:45",
+                    checkOutTime: null
+                }
+            ];
+
+            app.participants = demoParticipants;
+            app.extractBuildings();
+            app.setupBuildingFilters();
+            app.applyFilters();
+            app.updateDashboard();
+            app.showMainContent();
+            await app.saveToCloud();
+            
+            alert('Demo-Daten erfolgreich geladen und in die Cloud synchronisiert!');
+        }
+    </script>
+</body>
+</html>

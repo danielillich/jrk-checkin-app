@@ -3,642 +3,2009 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JRK Check-in App</title>
+    <title>JRK Check-in App - Cloud Edition</title>
     <style>
+        /* JRK Corporate Colors */
+        :root {
+            --jrk-petrol: rgb(50, 180, 190);
+            --jrk-red: rgb(240, 50, 55);
+            --jrk-yellow: rgb(255, 235, 105);
+            --jrk-blue: rgb(85, 70, 150);
+            --jrk-green: rgb(190, 225, 130);
+            --jrk-dark: #2c3e50;
+            --jrk-light: #ecf0f1;
+            --jrk-white: #ffffff;
+            --jrk-gray: #95a5a6;
+            --jrk-success: #27ae60;
+            --jrk-warning: #f39c12;
+            --jrk-danger: #e74c3c;
+        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--jrk-petrol), var(--jrk-blue));
             min-height: 100vh;
-            color: #333;
+            color: var(--jrk-dark);
         }
-
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
-
-        .header {
-            background: white;
-            border-radius: 15px;
+        /* Login Screen */
+        .login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            text-align: center;
         }
-
-        .header h1 {
-            color: #667eea;
+        .login-card {
+            background: var(--jrk-white);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        .login-logo {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        .login-title {
+            color: var(--jrk-petrol);
+            font-size: 2rem;
+            font-weight: 700;
             margin-bottom: 10px;
         }
-
+        .login-subtitle {
+            color: var(--jrk-gray);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
         .login-form {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            max-width: 400px;
-            margin: 50px auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
-
-        .form-group {
-            margin-bottom: 20px;
+        .login-input {
+            padding: 15px;
+            border: 2px solid var(--jrk-light);
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
         }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #555;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus, .form-group select:focus {
+        .login-input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--jrk-petrol);
+            box-shadow: 0 0 0 3px rgba(50, 180, 190, 0.1);
         }
-
-        .btn {
-            background: #667eea;
-            color: white;
+        .login-button {
+            background: var(--jrk-petrol);
+            color: var(--jrk-white);
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1rem;
             font-weight: 600;
-            transition: all 0.3s;
-            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-
-        .btn:hover {
-            background: #5a6fd8;
+        .login-button:hover {
+            background: var(--jrk-blue);
             transform: translateY(-2px);
         }
-
-        .btn-secondary {
-            background: #6c757d;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
-        .dashboard {
+        .login-error {
+            background: var(--jrk-red);
+            color: var(--jrk-white);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
             display: none;
         }
-
-        .dashboard-cards {
+        .cloud-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--jrk-white);
+            padding: 10px 15px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            z-index: 1000;
+        }
+        .cloud-status.connected {
+            border-left: 4px solid var(--jrk-green);
+        }
+        .cloud-status.connecting {
+            border-left: 4px solid var(--jrk-yellow);
+        }
+        .cloud-status.offline {
+            border-left: 4px solid var(--jrk-red);
+        }
+        .user-info {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--jrk-white);
+            padding: 10px 15px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            z-index: 1000;
+        }
+        .logout-btn {
+            background: var(--jrk-red);
+            color: var(--jrk-white);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+        /* Header */
+        header {
+            background: var(--jrk-white);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        header h1 {
+            color: var(--jrk-petrol);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .admin-section {
+            background: rgba(255, 235, 105, 0.2);
+            border: 2px solid var(--jrk-yellow);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .admin-title {
+            color: var(--jrk-dark);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        /* Upload Section */
+        .upload-section {
+            margin-top: 10px;
+        }
+        .upload-area {
+            border: 2px dashed var(--jrk-petrol);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(50, 180, 190, 0.05);
+        }
+        .upload-area:hover {
+            border-color: var(--jrk-blue);
+            background: rgba(85, 70, 150, 0.1);
+            transform: translateY(-2px);
+        }
+        .upload-area.dragover {
+            border-color: var(--jrk-green);
+            background: rgba(190, 225, 130, 0.2);
+        }
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .upload-content p {
+            font-size: 1rem;
+            color: var(--jrk-dark);
+            font-weight: 500;
+        }
+        .demo-button {
+            background: var(--jrk-green);
+            color: var(--jrk-white);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        .demo-button:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+        /* Saved Data Notification */
+        .saved-data-notification {
+            background: linear-gradient(135deg, var(--jrk-green), var(--jrk-yellow));
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .notification-content {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: var(--jrk-dark);
+        }
+        .notification-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+        .notification-text {
+            flex: 1;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--jrk-dark);
+            padding: 5px;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+        .notification-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        /* Dashboard */
+        .dashboard {
+            margin-bottom: 30px;
+        }
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
-            margin-bottom: 30px;
         }
-
-        .card {
-            background: white;
+        .stat-card {
+            background: var(--jrk-white);
             border-radius: 15px;
             padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             text-align: center;
-            transition: transform 0.3s;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
         }
-
-        .card:hover {
+        .stat-card:hover {
             transform: translateY(-5px);
         }
-
-        .card-number {
-            font-size: 2.5em;
-            font-weight: bold;
+        .stat-card.total {
+            border-left: 5px solid var(--jrk-petrol);
+        }
+        .stat-card.present {
+            border-left: 5px solid var(--jrk-green);
+        }
+        .stat-card.absent {
+            border-left: 5px solid var(--jrk-red);
+        }
+        .stat-card.catering {
+            border-left: 5px solid var(--jrk-yellow);
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--jrk-dark);
             margin-bottom: 10px;
         }
-
-        .card-label {
-            color: #666;
-            font-size: 1.1em;
+        .stat-label {
+            font-size: 1.1rem;
+            color: var(--jrk-gray);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-
-        .present { color: #28a745; }
-        .absent { color: #dc3545; }
-        .ausflug { color: #ffc107; }
-        .krank { color: #fd7e14; }
-
+        .catering-breakdown {
+            text-align: left;
+        }
+        .catering-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid var(--jrk-light);
+        }
+        .catering-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .catering-label {
+            font-weight: 600;
+            color: var(--jrk-dark);
+        }
+        .catering-count {
+            font-weight: 700;
+            color: var(--jrk-petrol);
+        }
+        /* Controls */
         .controls {
-            background: white;
+            background: var(--jrk-white);
             border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
-
+        /* Search Container */
+        .search-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .search-input {
+            padding: 12px 15px;
+            border: 2px solid var(--jrk-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--jrk-white);
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: var(--jrk-petrol);
+            box-shadow: 0 0 0 3px rgba(50, 180, 190, 0.1);
+        }
+        /* Filter Container */
+        .filter-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 15px;
+        }
+        .filter-group label {
+            font-weight: 600;
+            color: var(--jrk-dark);
+            min-width: 100px;
+        }
         .filter-buttons {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
             flex-wrap: wrap;
+            gap: 10px;
         }
-
         .filter-btn {
             padding: 8px 16px;
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
-            border-radius: 20px;
+            border: 2px solid var(--jrk-petrol);
+            background: var(--jrk-white);
+            color: var(--jrk-petrol);
+            border-radius: 25px;
             cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .filter-btn.active {
-            background: #667eea;
-            color: white;
-        }
-
-        .participants-table {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e1e5e9;
-        }
-
-        th {
-            background: #f8f9fa;
             font-weight: 600;
-            color: #555;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
         }
-
-        .status-select {
-            padding: 6px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            background: white;
+        .filter-btn:hover {
+            background: var(--jrk-petrol);
+            color: var(--jrk-white);
+            transform: translateY(-2px);
         }
-
-        .room-input {
-            padding: 6px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            width: 80px;
+        .filter-btn.active {
+            background: var(--jrk-petrol);
+            color: var(--jrk-white);
+            box-shadow: 0 4px 15px rgba(50, 180, 190, 0.3);
         }
-
-        .upload-area {
-            border: 2px dashed #667eea;
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .reset-btn, .export-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        .reset-btn {
+            background: var(--jrk-red);
+            color: var(--jrk-white);
+        }
+        .reset-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+        .export-btn {
+            background: var(--jrk-green);
+            color: var(--jrk-white);
+        }
+        .export-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+        /* Participants */
+        .participants {
+            background: var(--jrk-white);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .participants-header h2 {
+            color: var(--jrk-dark);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        .participants-list {
+            display: grid;
+            gap: 15px;
+        }
+        .participant-card {
+            background: var(--jrk-light);
             border-radius: 10px;
             padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s ease;
+            border-left: 5px solid var(--jrk-gray);
+        }
+        .participant-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        .participant-card.present {
+            border-left-color: var(--jrk-green);
+            background: rgba(190, 225, 130, 0.1);
+        }
+        .participant-card.absent {
+            border-left-color: var(--jrk-red);
+        }
+        .participant-card.ausflug {
+            border-left-color: var(--jrk-blue);
+            background: rgba(85, 70, 150, 0.1);
+        }
+        .participant-card.krank {
+            border-left-color: var(--jrk-warning);
+            background: rgba(243, 156, 18, 0.1);
+        }
+        .participant-info {
             cursor: pointer;
-            transition: all 0.3s;
         }
-
-        .upload-area:hover {
-            background: #f8f9ff;
+        .participant-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--jrk-dark);
+            margin-bottom: 5px;
         }
-
-        .upload-area.dragover {
-            background: #e3f2fd;
-            border-color: #2196f3;
+        .participant-details {
+            color: var(--jrk-gray);
+            font-size: 0.95rem;
         }
-
-        .hidden {
+        .participant-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-badge.present {
+            background: var(--jrk-green);
+            color: var(--jrk-white);
+        }
+        .status-badge.absent {
+            background: var(--jrk-red);
+            color: var(--jrk-white);
+        }
+        .status-badge.ausflug {
+            background: var(--jrk-blue);
+            color: var(--jrk-white);
+        }
+        .status-badge.krank {
+            background: var(--jrk-warning);
+            color: var(--jrk-white);
+        }
+        .checkin-time {
+            font-size: 0.8rem;
+            color: var(--jrk-gray);
+            text-align: center;
+        }
+        .participant-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .checkin-btn, .checkout-btn, .ausflug-btn, .krank-btn, .edit-room-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            margin: 2px;
+        }
+        .checkin-btn {
+            background: var(--jrk-green);
+            color: var(--jrk-white);
+        }
+        .checkin-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+        .checkout-btn {
+            background: var(--jrk-red);
+            color: var(--jrk-white);
+        }
+        .checkout-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+        .ausflug-btn {
+            background: var(--jrk-blue);
+            color: var(--jrk-white);
+        }
+        .ausflug-btn:hover {
+            background: #5a4a96;
+            transform: translateY(-2px);
+        }
+        .krank-btn {
+            background: var(--jrk-warning);
+            color: var(--jrk-white);
+        }
+        .krank-btn:hover {
+            background: #d68910;
+            transform: translateY(-2px);
+        }
+        .edit-room-btn {
+            background: var(--jrk-petrol);
+            color: var(--jrk-white);
+        }
+        .edit-room-btn:hover {
+            background: #2e9ca8;
+            transform: translateY(-2px);
+        }
+        /* Modal */
+        .modal {
             display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
         }
-
-        .user-info {
-            background: rgba(255,255,255,0.1);
-            padding: 10px 20px;
-            border-radius: 10px;
-            color: white;
-            margin-bottom: 20px;
+        .modal-content {
+            background-color: var(--jrk-white);
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .modal-header {
+            background: linear-gradient(135deg, var(--jrk-petrol), var(--jrk-blue));
+            color: var(--jrk-white);
+            padding: 20px 25px;
+            border-radius: 15px 15px 0 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-
-        .logout-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .modal-close {
+            color: var(--jrk-white);
+            font-size: 2rem;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: opacity 0.3s ease;
         }
-
-        .logout-btn:hover {
-            background: rgba(255,255,255,0.3);
+        .modal-close:hover {
+            opacity: 0.7;
         }
-
+        .modal-body {
+            padding: 25px;
+        }
+        .modal-detail-group {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--jrk-light);
+        }
+        .modal-detail-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .modal-detail-label {
+            font-weight: 600;
+            color: var(--jrk-dark);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+        .modal-detail-value {
+            color: var(--jrk-gray);
+            font-size: 1.1rem;
+        }
+        .workshop-list {
+            list-style: none;
+            padding: 0;
+        }
+        .workshop-item {
+            background: rgba(50, 180, 190, 0.1);
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border-left: 4px solid var(--jrk-petrol);
+        }
+        .workshop-item:last-child {
+            margin-bottom: 0;
+        }
+        /* Responsive Design */
         @media (max-width: 768px) {
             .container {
-                padding: 10px;
+                padding: 15px;
             }
             
-            .dashboard-cards {
-                grid-template-columns: repeat(2, 1fr);
+            header h1 {
+                font-size: 2rem;
             }
             
+            .search-container {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .filter-group {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .filter-group label {
+                min-width: auto;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .participant-card {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .participant-actions {
+                flex-direction: row;
+                justify-content: center;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cloud-status, .user-info {
+                position: relative;
+                top: auto;
+                left: auto;
+                right: auto;
+                margin-bottom: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
             .filter-buttons {
                 justify-content: center;
             }
             
-            table {
-                font-size: 14px;
+            .filter-btn {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+            
+            .participant-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .checkin-btn, .checkout-btn {
+                font-size: 0.8rem;
+                padding: 8px 16px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Login Form -->
-        <div id="loginForm" class="login-form">
-            <h2 style="text-align: center; margin-bottom: 30px; color: #667eea;">JRK Check-in System</h2>
-            <div class="form-group">
-                <label for="username">Benutzername:</label>
-                <input type="text" id="username" placeholder="Benutzername eingeben">
-            </div>
-            <div class="form-group">
-                <label for="password">Passwort:</label>
-                <input type="password" id="password" placeholder="Passwort eingeben">
-            </div>
-            <button class="btn" onclick="login()">Anmelden</button>
-            <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 14px;">
-                <strong>Demo-Zugänge:</strong><br>
-                Admin: admin / admin123<br>
-                Team: team / team123<br>
-                Leitung: leitung / leitung123
-            </div>
-        </div>
+    <!-- Cloud Status Indicator -->
+    <div class="cloud-status" id="cloudStatus">
+        <span id="cloudIcon">🔄</span>
+        <span id="cloudText">Verbinde...</span>
+    </div>
 
-        <!-- Dashboard -->
-        <div id="dashboard" class="dashboard">
-            <div class="user-info">
-                <span>Angemeldet als: <strong id="currentUser"></strong> (<span id="currentRole"></span>)</span>
-                <button class="logout-btn" onclick="logout()">Abmelden</button>
-            </div>
+    <!-- User Info -->
+    <div class="user-info" id="userInfo" style="display: none;">
+        <span>👤</span>
+        <span id="currentUser"></span>
+        <button class="logout-btn" onclick="logout()">Abmelden</button>
+    </div>
 
-            <div class="header">
-                <h1>JRK Check-in Dashboard</h1>
-                <p>Teilnehmerverwaltung für das verlängerte Wochenende</p>
-            </div>
-
-            <!-- Dashboard Cards -->
-            <div class="dashboard-cards">
-                <div class="card">
-                    <div class="card-number present" id="presentCount">0</div>
-                    <div class="card-label">Anwesend</div>
-                </div>
-                <div class="card">
-                    <div class="card-number absent" id="absentCount">0</div>
-                    <div class="card-label">Abwesend</div>
-                    <div style="font-size: 0.9em; margin-top: 10px; color: #666;">
-                        <div>Ausflug: <span id="ausflugsCount">0</span></div>
-                        <div>Krank: <span id="krankCount">0</span></div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-number" style="color: #17a2b8;" id="totalCount">0</div>
-                    <div class="card-label">Gesamt</div>
-                </div>
-                <div class="card">
-                    <div class="card-number" style="color: #6f42c1;" id="tagesgastCount">0</div>
-                    <div class="card-label">Tagesgäste</div>
-                </div>
-            </div>
-
-            <!-- Controls -->
-            <div class="controls">
-                <!-- Excel Upload (nur für Admin) -->
-                <div id="adminControls" class="hidden">
-                    <h3 style="margin-bottom: 15px;">Excel-Datei hochladen</h3>
-                    <div class="upload-area" onclick="document.getElementById('excelFile').click()">
-                        <input type="file" id="excelFile" accept=".xlsx,.xls" style="display: none;" onchange="uploadExcel(event)">
-                        <p>📁 Klicken Sie hier oder ziehen Sie eine Excel-Datei hierher</p>
-                        <p style="font-size: 0.9em; color: #666;">Unterstützte Formate: .xlsx, .xls</p>
-                    </div>
-                </div>
-
-                <!-- Filter Buttons -->
-                <h3 style="margin-bottom: 15px;">Status Filter</h3>
-                <div class="filter-buttons">
-                    <button class="filter-btn active" onclick="filterParticipants('all')">Alle</button>
-                    <button class="filter-btn" onclick="filterParticipants('present')">Anwesend</button>
-                    <button class="filter-btn" onclick="filterParticipants('absent')">Abwesend</button>
-                    <button class="filter-btn" onclick="filterParticipants('ausflug')">Ausflug</button>
-                    <button class="filter-btn" onclick="filterParticipants('krank')">Krank</button>
-                </div>
-            </div>
-
-            <!-- Participants Table -->
-            <div class="participants-table">
-                <h3 style="margin-bottom: 20px;">Teilnehmerliste</h3>
-                <table id="participantsTable">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Zimmer</th>
-                            <th>Gebäude</th>
-                            <th>Status</th>
-                            <th>Letzte Änderung</th>
-                        </tr>
-                    </thead>
-                    <tbody id="participantsBody">
-                        <!-- Wird dynamisch gefüllt -->
-                    </tbody>
-                </table>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-card">
+            <div class="login-logo">🏥</div>
+            <h1 class="login-title">JRK Check-in</h1>
+            <p class="login-subtitle">Echte Cloud Edition</p>
+            
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <input type="text" id="username" class="login-input" placeholder="Benutzername" required>
+                <input type="password" id="password" class="login-input" placeholder="Passwort" required>
+                <button type="submit" class="login-button">Anmelden</button>
+            </form>
+            
+            <div class="login-error" id="loginError">
+                Ungültige Anmeldedaten. Bitte versuchen Sie es erneut.
             </div>
         </div>
     </div>
 
+    <!-- Main App -->
+    <div class="container" id="mainApp" style="display: none;">
+        <header>
+            <h1>JRK Veranstaltungs Check-in</h1>
+            
+            <!-- Admin Section (only for admin users) -->
+            <div class="admin-section" id="adminSection" style="display: none;">
+                <div class="admin-title">
+                    <span>⚙️</span>
+                    <span>Administrator-Bereich</span>
+                </div>
+                <div class="upload-section">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-content">
+                            <div class="upload-icon">📁</div>
+                            <p>Excel-Datei hier ablegen oder klicken zum Auswählen</p>
+                            <button class="demo-button" onclick="loadDemoData()">🎯 Demo-Daten laden</button>
+                            <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="saved-data-notification" id="savedDataNotification" style="display: none;">
+            <div class="notification-content">
+                <span class="notification-icon">☁️</span>
+                <span class="notification-text">Cloud-Daten synchronisiert</span>
+                <button class="notification-close" id="closeSavedNotification">×</button>
+            </div>
+        </div>
+
+        <main id="mainContent" style="display: none;">
+            <!-- Dashboard - Vereinfacht auf 4 Karten -->
+            <section class="dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card total">
+                        <div class="stat-number" id="totalCount">0</div>
+                        <div class="stat-label">Gesamt</div>
+                    </div>
+                    <div class="stat-card present">
+                        <div class="stat-number" id="presentCount">0</div>
+                        <div class="stat-label">Anwesend</div>
+                    </div>
+                    <div class="stat-card absent">
+                        <div class="catering-breakdown">
+                            <div class="catering-item">
+                                <span class="catering-label">Abwesend:</span>
+                                <span class="catering-count" id="absentCount">0</span>
+                            </div>
+                            <div class="catering-item">
+                                <span class="catering-label">Ausflug:</span>
+                                <span class="catering-count" id="ausflugsDetailCount">0</span>
+                            </div>
+                            <div class="catering-item">
+                                <span class="catering-label">Krank:</span>
+                                <span class="catering-count" id="krankDetailCount">0</span>
+                            </div>
+                            <div class="catering-item">
+                                <span class="catering-label">Nicht eingecheckt:</span>
+                                <span class="catering-count" id="notCheckedCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card catering">
+                        <div class="catering-breakdown">
+                            <div class="catering-item">
+                                <span class="catering-label">Vollkost:</span>
+                                <span class="catering-count" id="vollkostCount">0</span>
+                            </div>
+                            <div class="catering-item">
+                                <span class="catering-label">Vegetarisch:</span>
+                                <span class="catering-count" id="vegetarischCount">0</span>
+                            </div>
+                            <div class="catering-item">
+                                <span class="catering-label">Vegan:</span>
+                                <span class="catering-count" id="veganCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Search and Filters -->
+            <section class="controls">
+                <div class="search-container">
+                    <input type="text" id="searchName" placeholder="Name/Buchungsnummer suchen..." class="search-input">
+                    <input type="text" id="searchAge" placeholder="Alter suchen..." class="search-input">
+                    <input type="text" id="searchRoom" placeholder="Zimmernummer suchen..." class="search-input">
+                </div>
+                
+                <div class="filter-container">
+                    <div class="filter-group">
+                        <label>Verpflegung:</label>
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-filter="all">Alle</button>
+                            <button class="filter-btn" data-filter="Vollkost">Vollkost</button>
+                            <button class="filter-btn" data-filter="Vegetarisch">Vegetarisch</button>
+                            <button class="filter-btn" data-filter="Vegan">Vegan</button>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Status:</label>
+                        <div class="filter-buttons">
+                            <button class="filter-btn status-filter active" data-status="alle-anmeldungen">Alle Anmeldungen</button>
+                            <button class="filter-btn status-filter" data-status="present">Anwesend</button>
+                            <button class="filter-btn status-filter" data-status="absent">Abwesend</button>
+                            <button class="filter-btn status-filter" data-status="ausflug">Ausflug</button>
+                            <button class="filter-btn status-filter" data-status="krank">Krank</button>
+                        </div>
+                    </div>
+
+                    <div class="filter-group" id="buildingFilterGroup" style="display: none;">
+                        <label>Gebäude:</label>
+                        <div class="filter-buttons" id="buildingFilters">
+                            <!-- Building filters will be dynamically added here -->
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="resetFilters" class="reset-btn">Filter zurücksetzen</button>
+                        <button id="exportBtn" class="export-btn">Gefilterte Daten exportieren</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Participants List -->
+            <section class="participants">
+                <div class="participants-header">
+                    <h2>Teilnehmer (<span id="filteredCount">0</span>)</h2>
+                </div>
+                <div class="participants-list" id="participantsList">
+                    <!-- Participants will be dynamically added here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for participant details -->
+    <div class="modal" id="participantModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalName"></h3>
+                <span class="modal-close" id="modalClose">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Participant details will be shown here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <script>
+        // FIXED: Cloud API Configuration - Compatible with current backend
+        const API_BASE_URL = window.location.origin + '/api';
+        
+        // User credentials and permissions
+        const validUsers = {
+            'admin': 'jrk2024!',
+            'team1': 'checkin123',
+            'team2': 'checkin123',
+            'team3': 'checkin123',
+            'leitung': 'jrk2024!'
+        };
+
+        const userPermissions = {
+            'admin': ['upload', 'editRoom', 'setStatus'],
+            'leitung': ['editRoom', 'setStatus'],
+            'team1': ['setStatus'],
+            'team2': ['setStatus'],
+            'team3': ['setStatus']
+        };
+
+        function hasPermission(action) {
+            if (!currentUser) return false;
+            return userPermissions[currentUser] && userPermissions[currentUser].includes(action);
+        }
+
+        // Current user
         let currentUser = null;
-        let participants = [];
-        let currentFilter = 'all';
 
-        // Login Funktion
-        async function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+        // JRK Check-in App - Real Cloud Version
+        class RealCloudCheckInApp {
+            constructor() {
+                this.participants = [];
+                this.filteredParticipants = [];
+                this.currentFilters = {
+                    catering: 'all',
+                    status: 'alle-anmeldungen',
+                    building: 'all',
+                    searchName: '',
+                    searchAge: '',
+                    searchRoom: ''
+                };
+                this.buildings = new Set();
+                this.isConnected = false;
+                this.syncInterval = null;
+                this.lastSyncTime = null;
+                this.init();
+            }
 
-            if (!username || !password) {
-                alert('Bitte Benutzername und Passwort eingeben');
+            async init() {
+                this.setupEventListeners();
+                await this.testCloudConnection();
+                await this.loadFromCloud();
+                this.startSyncInterval();
+            }
+
+            setupEventListeners() {
+                // File upload (admin only)
+                const uploadArea = document.getElementById('uploadArea');
+                const fileInput = document.getElementById('fileInput');
+
+                if (uploadArea && fileInput) {
+                    uploadArea.addEventListener('click', (e) => {
+                        if (e.target.tagName !== 'BUTTON') {
+                            fileInput.click();
+                        }
+                    });
+                    uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
+                    uploadArea.addEventListener('dragleave', this.handleDragLeave.bind(this));
+                    uploadArea.addEventListener('drop', this.handleDrop.bind(this));
+                    fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+                }
+
+                // Search inputs
+                document.getElementById('searchName').addEventListener('input', this.handleSearchName.bind(this));
+                document.getElementById('searchAge').addEventListener('input', this.handleSearchAge.bind(this));
+                document.getElementById('searchRoom').addEventListener('input', this.handleSearchRoom.bind(this));
+
+                // Filter buttons
+                document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+                    btn.addEventListener('click', this.handleCateringFilter.bind(this));
+                });
+
+                document.querySelectorAll('.status-filter').forEach(btn => {
+                    btn.addEventListener('click', this.handleStatusFilter.bind(this));
+                });
+
+                // Action buttons
+                document.getElementById('resetFilters').addEventListener('click', this.resetFilters.bind(this));
+                document.getElementById('exportBtn').addEventListener('click', this.exportFilteredData.bind(this));
+
+                // Modal
+                document.getElementById('modalClose').addEventListener('click', this.closeModal.bind(this));
+                document.getElementById('participantModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'participantModal') this.closeModal();
+                });
+
+                // Saved data notification
+                document.getElementById('closeSavedNotification').addEventListener('click', () => {
+                    document.getElementById('savedDataNotification').style.display = 'none';
+                });
+            }
+
+            async testCloudConnection() {
+                try {
+                    this.updateCloudStatus('connecting', 'Verbinde...');
+                    
+                    // FIXED: Use /api/data instead of /api/health
+                    const response = await fetch(`${API_BASE_URL}/data`);
+                    
+                    if (response.ok) {
+                        this.isConnected = true;
+                        this.updateCloudStatus('connected', 'Verbunden');
+                        console.log('Cloud connection established');
+                    } else {
+                        throw new Error('Connection test failed');
+                    }
+                } catch (error) {
+                    console.error('Cloud connection error:', error);
+                    this.isConnected = false;
+                    this.updateCloudStatus('offline', 'Offline');
+                }
+            }
+
+            startSyncInterval() {
+                // Sync every 30 seconds
+                this.syncInterval = setInterval(async () => {
+                    if (this.isConnected) {
+                        await this.syncWithCloud();
+                    } else {
+                        await this.testCloudConnection();
+                    }
+                }, 30000);
+            }
+
+            async syncWithCloud() {
+                try {
+                    // FIXED: Use correct API endpoint
+                    const response = await fetch(`${API_BASE_URL}/data`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const cloudData = await response.json();
+                    
+                    // FIXED: Handle both formats
+                    if (Array.isArray(cloudData)) {
+                        this.participants = cloudData;
+                    } else if (cloudData && Array.isArray(cloudData.participants)) {
+                        this.participants = cloudData.participants;
+                    }
+                    
+                    if (this.participants.length > 0) {
+                        this.extractBuildings();
+                        this.setupBuildingFilters();
+                        this.applyFilters();
+                        this.updateDashboard();
+                    }
+                    
+                    this.updateCloudStatus('connected', 'Verbunden');
+                } catch (error) {
+                    console.error('Sync error:', error);
+                    this.isConnected = false;
+                    this.updateCloudStatus('offline', 'Offline');
+                }
+            }
+
+            updateCloudStatus(status, text) {
+                const cloudStatus = document.getElementById('cloudStatus');
+                const cloudIcon = document.getElementById('cloudIcon');
+                const cloudText = document.getElementById('cloudText');
+                
+                cloudStatus.className = `cloud-status ${status}`;
+                cloudText.textContent = text;
+                
+                switch(status) {
+                    case 'connected':
+                        cloudIcon.textContent = '☁️';
+                        break;
+                    case 'offline':
+                        cloudIcon.textContent = '📱';
+                        break;
+                    case 'connecting':
+                        cloudIcon.textContent = '🔄';
+                        break;
+                }
+            }
+
+            async loadFromCloud() {
+                try {
+                    if (this.isConnected) {
+                        // FIXED: Use correct API endpoint
+                        const response = await fetch(`${API_BASE_URL}/data`);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        const cloudData = await response.json();
+                        
+                        // FIXED: Handle both formats
+                        if (Array.isArray(cloudData)) {
+                            this.participants = cloudData;
+                        } else if (cloudData && Array.isArray(cloudData.participants)) {
+                            this.participants = cloudData.participants;
+                        }
+                        
+                        this.processLoadedData();
+                    }
+                } catch (error) {
+                    console.error('Error loading from cloud:', error);
+                    this.isConnected = false;
+                    this.updateCloudStatus('offline', 'Offline');
+                }
+            }
+
+            processLoadedData() {
+                if (this.participants.length > 0) {
+                    // Konvertiere "Unbekannt" ohne Zimmer zu "Tagesgast"
+                    this.participants.forEach(participant => {
+                        if (participant.building === 'Unbekannt' && (!participant.room || participant.room.trim() === '' || participant.room === '0')) {
+                            participant.building = 'Tagesgast';
+                        }
+                    });
+                    
+                    this.extractBuildings();
+                    this.setupBuildingFilters();
+                    this.applyFilters();
+                    this.updateDashboard();
+                    this.showMainContent();
+                    
+                    // Show sync notification
+                    document.getElementById('savedDataNotification').style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('savedDataNotification').style.display = 'none';
+                    }, 3000);
+                }
+            }
+
+            async saveToCloud() {
+                try {
+                    if (this.isConnected) {
+                        // FIXED: Use correct API endpoint for saving participants
+                        const response = await fetch(`${API_BASE_URL}/participants`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                participants: this.participants,
+                                user: currentUser
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Failed to save participants');
+                        }
+                        
+                        this.updateCloudStatus('connected', 'Gespeichert');
+                        setTimeout(() => {
+                            this.updateCloudStatus('connected', 'Verbunden');
+                        }, 2000);
+                        
+                    } else {
+                        throw new Error('Not connected to cloud');
+                    }
+                } catch (error) {
+                    console.error('Error saving to cloud:', error);
+                    this.updateCloudStatus('offline', 'Speicherfehler');
+                    setTimeout(() => {
+                        this.updateCloudStatus('offline', 'Offline');
+                    }, 3000);
+                }
+            }
+
+            handleDragOver(e) {
+                e.preventDefault();
+                e.currentTarget.classList.add('dragover');
+            }
+
+            handleDragLeave(e) {
+                e.currentTarget.classList.remove('dragover');
+            }
+
+            handleDrop(e) {
+                e.preventDefault();
+                e.currentTarget.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.processFile(files[0]);
+                }
+            }
+
+            handleFileSelect(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    this.processFile(file);
+                }
+                // File Input zurücksetzen für wiederholte Uploads
+                e.target.value = '';
+            }
+
+            async processFile(file) {
+                if (!hasPermission('upload')) {
+                    alert('Sie haben keine Berechtigung, Excel-Dateien hochzuladen.');
+                    return;
+                }
+
+                if (!file.name.match(/\.(xlsx|xls)$/)) {
+                    alert('Bitte wählen Sie eine Excel-Datei (.xlsx oder .xls)');
+                    return;
+                }
+
+                try {
+                    const data = await this.readExcelFile(file);
+                    this.participants = this.parseParticipants(data);
+                    this.extractBuildings();
+                    this.setupBuildingFilters();
+                    this.applyFilters();
+                    this.updateDashboard();
+                    this.showMainContent();
+                    await this.saveToCloud();
+                    
+                    // File Input zurücksetzen
+                    const fileInput = document.getElementById('fileInput');
+                    if (fileInput) fileInput.value = '';
+                    
+                } catch (error) {
+                    console.error('Fehler beim Verarbeiten der Datei:', error);
+                    alert('Fehler beim Lesen der Excel-Datei. Bitte überprüfen Sie das Format.');
+                }
+            }
+
+            readExcelFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = new Uint8Array(e.target.result);
+                            const workbook = XLSX.read(data, { type: 'array' });
+                            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                            const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                            resolve(jsonData);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+
+            parseParticipants(data) {
+                if (data.length < 2) return [];
+
+                const headers = data[0].map(h => String(h).toLowerCase().trim());
+                const participants = [];
+
+                // Find column indices with priority for specific columns
+                let bookingIndex = 0; // Column A
+                if (bookingIndex >= headers.length || !data[1] || !data[1][bookingIndex]) {
+                    bookingIndex = this.findColumnIndex(headers, ['buchung', 'booking', 'buchungsnummer']);
+                }
+                
+                let lastNameIndex = 2; // Column C
+                if (lastNameIndex >= headers.length || !data[1] || !data[1][lastNameIndex]) {
+                    lastNameIndex = this.findColumnIndex(headers, ['nachname', 'lastname', 'name']);
+                }
+                
+                const firstNameIndex = this.findColumnIndex(headers, ['vorname', 'firstname']);
+                const ageIndex = this.findColumnIndex(headers, ['alter', 'age']);
+                
+                let roomIndex = 44; // Column AS
+                if (roomIndex >= headers.length || !data[1] || !data[1][roomIndex]) {
+                    roomIndex = this.findColumnIndex(headers, ['zimmer', 'room', 'zimmernummer']);
+                }
+                
+                const cateringIndex = this.findColumnIndex(headers, ['verpflegung', 'catering', 'essen']);
+                const workshopIndex = this.findColumnIndex(headers, ['workshop', 'workshops']);
+                
+                let buildingIndex = 45; // Column AT
+                if (buildingIndex >= headers.length || !data[1] || !data[1][buildingIndex]) {
+                    buildingIndex = this.findColumnIndex(headers, ['gebäude', 'building', 'haus']);
+                }
+
+                for (let i = 1; i < data.length; i++) {
+                    const row = data[i];
+                    if (!row || row.length === 0) continue;
+
+                    const firstName = firstNameIndex !== -1 ? String(row[firstNameIndex] || '').trim() : '';
+                    const lastName = lastNameIndex !== -1 ? String(row[lastNameIndex] || '').trim() : '';
+                    const name = `${firstName} ${lastName}`.trim();
+
+                    if (!name) continue;
+
+                    const booking = bookingIndex !== -1 ? String(row[bookingIndex] || '').trim() : '';
+                    const age = ageIndex !== -1 ? String(row[ageIndex] || '').trim() : '';
+                    const room = roomIndex !== -1 ? String(row[roomIndex] || '').trim() : '';
+                    const catering = cateringIndex !== -1 ? String(row[cateringIndex] || '').trim() : '';
+                    const workshop = workshopIndex !== -1 ? String(row[workshopIndex] || '').trim() : '';
+                    const building = buildingIndex !== -1 ? String(row[buildingIndex] || '').trim() : '';
+
+                    const extractedBuilding = this.extractBuildingFromRoom(room);
+                    const participant = {
+                        id: i,
+                        name,
+                        firstName,
+                        lastName,
+                        booking,
+                        age,
+                        room,
+                        originalRoom: room, // Ursprüngliches Zimmer speichern
+                        building: building || extractedBuilding,
+                        catering: this.normalizeCatering(catering),
+                        workshop,
+                        workshops: this.parseWorkshops(workshop),
+                        status: 'absent', // absent, present, ausflug, krank
+                        checkInTime: null,
+                        checkOutTime: null,
+                        ausflugsTime: null,
+                        krankTime: null,
+                        roomChanges: [] // Historie der Zimmerwechsel
+                    };
+
+                    participants.push(participant);
+                }
+
+                return participants;
+            }
+
+            findColumnIndex(headers, possibleNames) {
+                for (const name of possibleNames) {
+                    const index = headers.findIndex(h => h.includes(name));
+                    if (index !== -1) return index;
+                }
+                return -1;
+            }
+
+            normalizeCatering(catering) {
+                const lower = catering.toLowerCase();
+                if (lower.includes('vegan')) return 'Vegan';
+                if (lower.includes('vegetar')) return 'Vegetarisch';
+                if (lower.includes('vollkost') || lower.includes('normal') || lower.includes('fleisch')) return 'Vollkost';
+                return catering || 'Vollkost';
+            }
+
+            parseWorkshops(workshopString) {
+                if (!workshopString) return [];
+                
+                const workshops = [];
+                const numbers = workshopString.match(/\d+/g);
+                
+                if (numbers) {
+                    numbers.forEach(num => {
+                        const number = parseInt(num);
+                        if (number % 10 === 0 || number % 100 === 0) {
+                            workshops.push({
+                                number: number,
+                                timeSlot: this.getWorkshopTimeSlot(number)
+                            });
+                        }
+                    });
+                }
+                
+                return workshops;
+            }
+
+            getWorkshopTimeSlot(number) {
+                if (number >= 10 && number < 20) return '10:00 - 11:30';
+                if (number >= 20 && number < 30) return '12:00 - 13:30';
+                if (number >= 30 && number < 40) return '14:00 - 15:30';
+                if (number >= 100 && number < 200) return '16:00 - 17:30';
+                return 'Unbekannt';
+            }
+
+            extractBuildings() {
+                this.buildings.clear();
+                this.participants.forEach(participant => {
+                    if (participant.building) {
+                        this.buildings.add(participant.building);
+                    }
+                });
+            }
+
+            extractBuildingFromRoom(room) {
+                const roomStr = String(room).trim();
+                
+                // Wenn kein Zimmer oder leer, dann Tagesgast
+                if (!roomStr || roomStr === '' || roomStr === '0') {
+                    return 'Tagesgast';
+                }
+                
+                const roomNum = parseInt(roomStr);
+                
+                // JRK Gebäude-Zuordnung
+                if (roomNum >= 14 && roomNum <= 21) return 'A-EG';
+                if (roomNum >= 26 && roomNum <= 33) return 'A-OG';
+                if (roomNum === 341 || roomNum === 342) return 'A-OG'; // 34/1, 34/2
+                if (roomNum >= 37 && roomNum <= 44) return 'B-EG';
+                if (roomNum >= 46 && roomNum <= 55) return 'B-OG';
+                if (roomNum >= 81 && roomNum <= 94) return 'SH';
+                
+                // Fallback: Versuche Buchstaben zu extrahieren
+                const match = roomStr.match(/^([A-Za-z-]+)/);
+                if (match) {
+                    return match[1].toUpperCase();
+                }
+                
+                // Wenn nichts passt und Zimmer vorhanden, dann Tagesgast
+                return 'Tagesgast';
+            }
+
+            setupBuildingFilters() {
+                const buildingFilterGroup = document.getElementById('buildingFilterGroup');
+                const buildingFilters = document.getElementById('buildingFilters');
+                
+                if (this.buildings.size > 0) {
+                    buildingFilterGroup.style.display = 'block';
+                    buildingFilters.innerHTML = '';
+                    
+                    const allBtn = document.createElement('button');
+                    allBtn.className = 'filter-btn active';
+                    allBtn.setAttribute('data-building', 'all');
+                    allBtn.textContent = 'Alle';
+                    allBtn.addEventListener('click', this.handleBuildingFilter.bind(this));
+                    buildingFilters.appendChild(allBtn);
+                    
+                    Array.from(this.buildings).sort().forEach(building => {
+                        const btn = document.createElement('button');
+                        btn.className = 'filter-btn';
+                        btn.setAttribute('data-building', building);
+                        btn.textContent = building;
+                        btn.addEventListener('click', this.handleBuildingFilter.bind(this));
+                        buildingFilters.appendChild(btn);
+                    });
+                } else {
+                    buildingFilterGroup.style.display = 'none';
+                }
+            }
+
+            handleSearchName(e) {
+                this.currentFilters.searchName = e.target.value.toLowerCase();
+                this.applyFilters();
+            }
+
+            handleSearchAge(e) {
+                this.currentFilters.searchAge = e.target.value.toLowerCase();
+                this.applyFilters();
+            }
+
+            handleSearchRoom(e) {
+                this.currentFilters.searchRoom = e.target.value.toLowerCase();
+                this.applyFilters();
+            }
+
+            handleCateringFilter(e) {
+                document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                this.currentFilters.catering = e.target.dataset.filter;
+                this.applyFilters();
+            }
+
+            handleStatusFilter(e) {
+                document.querySelectorAll('.status-filter').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                this.currentFilters.status = e.target.dataset.status;
+                this.applyFilters();
+            }
+
+            handleBuildingFilter(e) {
+                document.querySelectorAll('.filter-btn[data-building]').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                this.currentFilters.building = e.target.dataset.building;
+                this.applyFilters();
+            }
+
+            applyFilters() {
+                this.filteredParticipants = this.participants.filter(participant => {
+                    if (this.currentFilters.searchName) {
+                        const searchTerm = this.currentFilters.searchName;
+                        const fullNameMatch = participant.name.toLowerCase().includes(searchTerm);
+                        const firstNameMatch = participant.firstName.toLowerCase().includes(searchTerm);
+                        const lastNameMatch = participant.lastName.toLowerCase().includes(searchTerm);
+                        const bookingMatch = participant.booking.toLowerCase().includes(searchTerm);
+                        if (!fullNameMatch && !firstNameMatch && !lastNameMatch && !bookingMatch) return false;
+                    }
+
+                    if (this.currentFilters.searchAge) {
+                        const ageMatch = participant.age.toLowerCase().includes(this.currentFilters.searchAge);
+                        if (!ageMatch) return false;
+                    }
+
+                    if (this.currentFilters.searchRoom) {
+                        const roomMatch = participant.room.toLowerCase().includes(this.currentFilters.searchRoom);
+                        if (!roomMatch) return false;
+                    }
+
+                    if (this.currentFilters.catering !== 'all') {
+                        if (participant.catering !== this.currentFilters.catering) return false;
+                    }
+
+                    if (this.currentFilters.status === 'present' && participant.status !== 'present') return false;
+                    if (this.currentFilters.status === 'absent' && participant.status !== 'absent') return false;
+                    if (this.currentFilters.status === 'ausflug' && participant.status !== 'ausflug') return false;
+                    if (this.currentFilters.status === 'krank' && participant.status !== 'krank') return false;
+
+                    if (this.currentFilters.building !== 'all') {
+                        if (participant.building !== this.currentFilters.building) return false;
+                    }
+
+                    return true;
+                });
+
+                this.renderParticipants();
+                this.updateDashboard();
+            }
+
+            resetFilters() {
+                this.currentFilters = {
+                    catering: 'all',
+                    status: 'alle-anmeldungen',
+                    building: 'all',
+                    searchName: '',
+                    searchAge: '',
+                    searchRoom: ''
+                };
+
+                document.getElementById('searchName').value = '';
+                document.getElementById('searchAge').value = '';
+                document.getElementById('searchRoom').value = '';
+
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+                const alleAnmeldungenBtn = document.querySelector('.status-filter[data-status="alle-anmeldungen"]');
+                if (alleAnmeldungenBtn) alleAnmeldungenBtn.classList.add('active');
+                
+                const allBuildingBtn = document.querySelector('.filter-btn[data-building="all"]');
+                if (allBuildingBtn) allBuildingBtn.classList.add('active');
+
+                this.applyFilters();
+            }
+
+            renderParticipants() {
+                const container = document.getElementById('participantsList');
+                const filteredCount = document.getElementById('filteredCount');
+                
+                filteredCount.textContent = this.filteredParticipants.length;
+                
+                if (this.filteredParticipants.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 0; color: #95a5a6;">Keine Teilnehmer gefunden</div>';
+                    return;
+                }
+
+                container.innerHTML = this.filteredParticipants.map(participant => {
+                    const statusText = {
+                        'present': 'Anwesend',
+                        'absent': 'Abwesend', 
+                        'ausflug': 'Ausflug',
+                        'krank': 'Krank'
+                    };
+                    
+                    return `
+                    <div class="participant-card ${participant.status}">
+                        <div class="participant-info" onclick="app.showParticipantDetails(${participant.id})">
+                            <div class="participant-name">${participant.name}</div>
+                            <div class="participant-details">
+                                Buchung: ${participant.booking} | Alter: ${participant.age} | Zimmer: ${participant.room} | Gebäude: ${participant.building} | ${participant.catering}
+                                ${participant.workshops.length > 0 ? `<br>Workshops: ${participant.workshops.map(w => w.number).join(', ')}` : ''}
+                                ${participant.room !== participant.originalRoom ? `<br><strong>⚠️ Zimmer gewechselt von ${participant.originalRoom}</strong>` : ''}
+                            </div>
+                        </div>
+                        <div class="participant-meta">
+                            <div class="status-badge ${participant.status}">
+                                ${statusText[participant.status]}
+                            </div>
+                            ${participant.checkInTime ? `<div class="checkin-time">Check-in: ${participant.checkInTime}</div>` : ''}
+                            ${participant.checkOutTime ? `<div class="checkin-time">Check-out: ${participant.checkOutTime}</div>` : ''}
+                            ${participant.ausflugsTime ? `<div class="checkin-time">Ausflug: ${participant.ausflugsTime}</div>` : ''}
+                            ${participant.krankTime ? `<div class="checkin-time">Krank: ${participant.krankTime}</div>` : ''}
+                        </div>
+                        <div class="participant-actions">
+                            ${hasPermission('setStatus') ? `
+                                <button class="checkin-btn" onclick="app.setStatus(${participant.id}, 'present')">Anwesend</button>
+                                <button class="checkout-btn" onclick="app.setStatus(${participant.id}, 'absent')">Abwesend</button>
+                                <button class="ausflug-btn" onclick="app.setStatus(${participant.id}, 'ausflug')">Ausflug</button>
+                                <button class="krank-btn" onclick="app.setStatus(${participant.id}, 'krank')">Krank</button>
+                            ` : ''}
+                            ${hasPermission('editRoom') ? `<button class="edit-room-btn" onclick="app.editRoom(${participant.id})">Zimmer</button>` : ''}
+                        </div>
+                    </div>
+                `;
+                }).join('');
+            }
+
+            async setStatus(participantId, newStatus) {
+                if (!hasPermission('setStatus')) {
+                    alert('Sie haben keine Berechtigung, Status zu ändern.');
+                    return;
+                }
+
+                const participant = this.participants.find(p => p.id === participantId);
+                if (!participant) return;
+                
+                try {
+                    // FIXED: Use correct API endpoint for status updates
+                    const response = await fetch(`${API_BASE_URL}/checkin/${participantId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            status: newStatus,
+                            user: currentUser
+                        })
+                    });
+
+                    if (response.ok) {
+                        // Update local data
+                        const timestamp = new Date().toLocaleString('de-DE');
+                        participant.status = newStatus;
+                        
+                        // Reset alle Zeitstempel
+                        participant.checkInTime = null;
+                        participant.checkOutTime = null;
+                        participant.ausflugsTime = null;
+                        participant.krankTime = null;
+                        
+                        // Setze entsprechenden Zeitstempel
+                        switch(newStatus) {
+                            case 'present':
+                                participant.checkInTime = timestamp;
+                                break;
+                            case 'absent':
+                                participant.checkOutTime = timestamp;
+                                break;
+                            case 'ausflug':
+                                participant.ausflugsTime = timestamp;
+                                break;
+                            case 'krank':
+                                participant.krankTime = timestamp;
+                                break;
+                        }
+                        
+                        // Update UI
+                        this.applyFilters();
+                        this.updateDashboard();
+                    } else {
+                        throw new Error('Update failed');
+                    }
+                } catch (error) {
+                    console.error('Error updating status:', error);
+                    alert('Fehler beim Aktualisieren des Status');
+                }
+            }
+
+            editRoom(participantId) {
+                if (!hasPermission('editRoom')) {
+                    alert('Sie haben keine Berechtigung, Zimmer zu ändern.');
+                    return;
+                }
+                
+                const participant = this.participants.find(p => p.id === participantId);
+                if (!participant) return;
+                
+                const newRoom = prompt(`Neues Zimmer für ${participant.name}:`, participant.room);
+                if (newRoom !== null && newRoom.trim() !== participant.room) {
+                    const oldRoom = participant.room;
+                    const oldBuilding = participant.building;
+                    
+                    participant.room = newRoom.trim();
+                    participant.building = this.extractBuildingFromRoom(participant.room);
+                    
+                    // Zimmerwechsel in Historie speichern
+                    if (!participant.roomChanges) participant.roomChanges = [];
+                    participant.roomChanges.push({
+                        from: oldRoom,
+                        to: participant.room,
+                        fromBuilding: oldBuilding,
+                        toBuilding: participant.building,
+                        timestamp: new Date().toLocaleString('de-DE'),
+                        user: currentUser
+                    });
+                    
+                    this.extractBuildings();
+                    this.setupBuildingFilters();
+                    this.applyFilters();
+                    this.saveToCloud();
+                    
+                    alert(`Zimmer von ${participant.name} wurde von ${oldRoom} (${oldBuilding}) zu ${participant.room} (${participant.building}) geändert.`);
+                }
+            }
+
+            showParticipantDetails(participantId) {
+                const participant = this.participants.find(p => p.id === participantId);
+                if (!participant) return;
+
+                document.getElementById('modalName').textContent = participant.name;
+                
+                const modalBody = document.getElementById('modalBody');
+                modalBody.innerHTML = `
+                    <div class="modal-detail-group">
+                        <div class="modal-detail-label">Buchungsnummer</div>
+                        <div class="modal-detail-value">${participant.booking}</div>
+                    </div>
+                    <div class="modal-detail-group">
+                        <div class="modal-detail-label">Alter</div>
+                        <div class="modal-detail-value">${participant.age}</div>
+                    </div>
+                    <div class="modal-detail-group">
+                        <div class="modal-detail-label">Zimmernummer</div>
+                        <div class="modal-detail-value">${participant.room}</div>
+                    </div>
+                    <div class="modal-detail-group">
+                        <div class="modal-detail-label">Gebäude</div>
+                        <div class="modal-detail-value">${participant.building}</div>
+                    </div>
+                    <div class="modal-detail-group">
+                        <div class="modal-detail-label">Verpflegung</div>
+                        <div class="modal-detail-value">${participant.catering}</div>
+                    </div>
+                    <div class="modal-detail-group">
+                        <div class="modal-detail-label">Status</div>
+                        <div class="modal-detail-value">${participant.status === 'present' ? 'Anwesend' : participant.status === 'ausflug' ? 'Ausflug' : participant.status === 'krank' ? 'Krank' : 'Abwesend'}</div>
+                    </div>
+                    ${participant.checkInTime ? `
+                        <div class="modal-detail-group">
+                            <div class="modal-detail-label">Check-in Zeit</div>
+                            <div class="modal-detail-value">${participant.checkInTime}</div>
+                        </div>
+                    ` : ''}
+                    ${participant.checkOutTime ? `
+                        <div class="modal-detail-group">
+                            <div class="modal-detail-label">Check-out Zeit</div>
+                            <div class="modal-detail-value">${participant.checkOutTime}</div>
+                        </div>
+                    ` : ''}
+                    ${participant.ausflugsTime ? `
+                        <div class="modal-detail-group">
+                            <div class="modal-detail-label">Ausflug Zeit</div>
+                            <div class="modal-detail-value">${participant.ausflugsTime}</div>
+                        </div>
+                    ` : ''}
+                    ${participant.krankTime ? `
+                        <div class="modal-detail-group">
+                            <div class="modal-detail-label">Krank Zeit</div>
+                            <div class="modal-detail-value">${participant.krankTime}</div>
+                        </div>
+                    ` : ''}
+                    ${participant.workshops.length > 0 ? `
+                        <div class="modal-detail-group">
+                            <div class="modal-detail-label">Workshops</div>
+                            <div class="modal-detail-value">
+                                <ul class="workshop-list">
+                                    ${participant.workshops.map(workshop => 
+                                        `<li class="workshop-item">Workshop ${workshop.number} (${workshop.timeSlot})</li>`
+                                    ).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${participant.roomChanges && participant.roomChanges.length > 0 ? `
+                        <div class="modal-detail-group">
+                            <div class="modal-detail-label">Zimmerwechsel</div>
+                            <div class="modal-detail-value">
+                                <ul class="workshop-list">
+                                    ${participant.roomChanges.map(change => 
+                                        `<li class="workshop-item">${change.from} → ${change.to} (${change.timestamp} von ${change.user})</li>`
+                                    ).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+
+                document.getElementById('participantModal').style.display = 'block';
+            }
+
+            closeModal() {
+                document.getElementById('participantModal').style.display = 'none';
+            }
+
+            updateDashboard() {
+                const total = this.participants.length;
+                const present = this.participants.filter(p => p.status === 'present').length;
+                const absent = this.participants.filter(p => p.status === 'absent').length;
+                const ausflug = this.participants.filter(p => p.status === 'ausflug').length;
+                const krank = this.participants.filter(p => p.status === 'krank').length;
+                const notChecked = absent; // Alle die wirklich abwesend sind (nicht eingecheckt)
+
+                const cateringCounts = {
+                    'Vollkost': 0,
+                    'Vegetarisch': 0,
+                    'Vegan': 0
+                };
+
+                this.participants.forEach(participant => {
+                    if (cateringCounts.hasOwnProperty(participant.catering)) {
+                        cateringCounts[participant.catering]++;
+                    }
+                });
+
+                document.getElementById('totalCount').textContent = total;
+                document.getElementById('presentCount').textContent = present;
+                
+                // Abwesend-Aufschlüsselung
+                document.getElementById('absentCount').textContent = absent + ausflug + krank;
+                document.getElementById('ausflugsDetailCount').textContent = ausflug;
+                document.getElementById('krankDetailCount').textContent = krank;
+                document.getElementById('notCheckedCount').textContent = notChecked;
+                
+                // Verpflegung
+                document.getElementById('vollkostCount').textContent = cateringCounts['Vollkost'];
+                document.getElementById('vegetarischCount').textContent = cateringCounts['Vegetarisch'];
+                document.getElementById('veganCount').textContent = cateringCounts['Vegan'];
+            }
+
+            showMainContent() {
+                document.getElementById('mainContent').style.display = 'block';
+            }
+
+            exportFilteredData() {
+                if (this.filteredParticipants.length === 0) {
+                    alert('Keine Daten zum Exportieren vorhanden.');
+                    return;
+                }
+
+                try {
+                    const exportData = [
+                        ['Name', 'Buchungsnummer', 'Alter', 'Zimmernummer', 'Gebäude', 'Verpflegung', 'Workshop', 'Status', 'Check-in Zeit', 'Check-out Zeit']
+                    ];
+
+                    this.filteredParticipants.forEach(participant => {
+                        exportData.push([
+                            participant.name,
+                            participant.booking,
+                            participant.age,
+                            participant.room,
+                            participant.building,
+                            participant.catering,
+                            participant.workshop,
+                            participant.status === 'present' ? 'Anwesend' : 
+                            participant.status === 'ausflug' ? 'Ausflug' :
+                            participant.status === 'krank' ? 'Krank' : 'Abwesend',
+                            participant.checkInTime || '',
+                            participant.checkOutTime || ''
+                        ]);
+                    });
+
+                    const wb = XLSX.utils.book_new();
+                    const ws = XLSX.utils.aoa_to_sheet(exportData);
+                    XLSX.utils.book_append_sheet(wb, ws, 'Teilnehmer');
+
+                    const now = new Date();
+                    const dateStr = now.toISOString().split('T')[0];
+                    const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+                    const filename = `JRK_Checkin_Export_${dateStr}_${timeStr}.xlsx`;
+
+                    XLSX.writeFile(wb, filename);
+                    alert(`Export erfolgreich! ${this.filteredParticipants.length} Teilnehmer exportiert.`);
+                } catch (error) {
+                    console.error('Fehler beim Exportieren:', error);
+                    alert('Fehler beim Exportieren der Daten. Bitte versuchen Sie es erneut.');
+                }
+            }
+
+            destroy() {
+                if (this.syncInterval) {
+                    clearInterval(this.syncInterval);
+                }
+            }
+        }
+
+        // Authentication functions
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (validUsers[username] && validUsers[username] === password) {
+                currentUser = username;
+                
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                
+                document.getElementById('userInfo').style.display = 'flex';
+                document.getElementById('currentUser').textContent = username;
+                
+                // Check permissions after currentUser is set
+                setTimeout(() => {
+                    if (hasPermission('upload')) {
+                        document.getElementById('adminSection').style.display = 'block';
+                    } else {
+                        document.getElementById('adminSection').style.display = 'none';
+                    }
+                }, 100);
+                
+                window.app = new RealCloudCheckInApp();
+                
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('loginError').style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function logout() {
+            if (window.app) {
+                window.app.destroy();
+                window.app = null;
+            }
+            
+            currentUser = null;
+            
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'none';
+            document.getElementById('adminSection').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'none';
+            
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // FIXED Demo data function
+        async function loadDemoData() {
+            if (!hasPermission('upload')) {
+                alert('Sie haben keine Berechtigung, Demo-Daten zu laden.');
                 return;
             }
 
             try {
-                const response = await fetch('/api/login', {
+                // FIXED: Use correct API endpoint
+                const response = await fetch(`${API_BASE_URL}/demo-data`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    currentUser = result.user;
-                    document.getElementById('loginForm').style.display = 'none';
-                    document.getElementById('dashboard').style.display = 'block';
-                    document.getElementById('currentUser').textContent = currentUser.username;
-                    document.getElementById('currentRole').textContent = currentUser.role;
-
-                    // Admin-Controls anzeigen
-                    if (currentUser.role === 'admin') {
-                        document.getElementById('adminControls').classList.remove('hidden');
-                    }
-
-                    loadParticipants();
-                } else {
-                    alert('Ungültige Anmeldedaten');
-                }
-            } catch (error) {
-                console.error('Login Fehler:', error);
-                alert('Anmeldung fehlgeschlagen');
-            }
-        }
-
-        // Logout Funktion
-        function logout() {
-            currentUser = null;
-            participants = [];
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            document.getElementById('adminControls').classList.add('hidden');
-        }
-
-        // Teilnehmer laden
-        async function loadParticipants() {
-            try {
-                const response = await fetch('/api/participants');
-                participants = await response.json();
-                updateDashboard();
-                renderParticipants();
-            } catch (error) {
-                console.error('Fehler beim Laden der Teilnehmer:', error);
-            }
-        }
-
-        // Dashboard aktualisieren
-        function updateDashboard() {
-            const present = participants.filter(p => p.status === 'present').length;
-            const absent = participants.filter(p => p.status === 'absent').length;
-            const ausflug = participants.filter(p => p.status === 'ausflug').length;
-            const krank = participants.filter(p => p.status === 'krank').length;
-            const tagesgast = participants.filter(p => p.building === 'Tagesgast').length;
-
-            document.getElementById('presentCount').textContent = present;
-            document.getElementById('absentCount').textContent = absent;
-            document.getElementById('ausflugsCount').textContent = ausflug;
-            document.getElementById('krankCount').textContent = krank;
-            document.getElementById('totalCount').textContent = participants.length;
-            document.getElementById('tagesgastCount').textContent = tagesgast;
-        }
-
-        // Teilnehmer rendern
-        function renderParticipants() {
-            const tbody = document.getElementById('participantsBody');
-            tbody.innerHTML = '';
-
-            let filteredParticipants = participants;
-            if (currentFilter !== 'all') {
-                filteredParticipants = participants.filter(p => p.status === currentFilter);
-            }
-
-            filteredParticipants.forEach(participant => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${participant.name}</td>
-                    <td>
-                        <input type="text" class="room-input" value="${participant.room || ''}" 
-                               onchange="updateRoom(${participant.id}, this.value)">
-                    </td>
-                    <td>${participant.building || 'Tagesgast'}</td>
-                    <td>
-                        <select class="status-select" onchange="updateStatus(${participant.id}, this.value)">
-                            <option value="present" ${participant.status === 'present' ? 'selected' : ''}>Anwesend</option>
-                            <option value="absent" ${participant.status === 'absent' ? 'selected' : ''}>Abwesend</option>
-                            <option value="ausflug" ${participant.status === 'ausflug' ? 'selected' : ''}>Ausflug</option>
-                            <option value="krank" ${participant.status === 'krank' ? 'selected' : ''}>Krank</option>
-                        </select>
-                    </td>
-                    <td>${participant.lastChanged || 'Nie'}</td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // Status aktualisieren
-        async function updateStatus(id, status) {
-            try {
-                const response = await fetch(`/api/participants/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        status, 
-                        lastChanged: new Date().toLocaleString('de-DE')
-                    })
+                    body: JSON.stringify({ user: currentUser })
                 });
 
                 if (response.ok) {
-                    const participant = participants.find(p => p.id === id);
-                    if (participant) {
-                        participant.status = status;
-                        participant.lastChanged = new Date().toLocaleString('de-DE');
-                    }
-                    updateDashboard();
-                    renderParticipants();
-                }
-            } catch (error) {
-                console.error('Fehler beim Aktualisieren des Status:', error);
-            }
-        }
-
-        // Zimmer aktualisieren
-        async function updateRoom(id, room) {
-            // Gebäude automatisch bestimmen
-            let building = 'Tagesgast';
-            if (room && room !== '0' && room.trim() !== '') {
-                const roomNum = parseInt(room);
-                if (roomNum >= 100 && roomNum < 200) building = 'A';
-                else if (roomNum >= 200 && roomNum < 300) building = 'B';
-                else if (roomNum >= 300) building = 'C';
-            }
-
-            try {
-                const response = await fetch(`/api/participants/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        room, 
-                        building,
-                        lastChanged: new Date().toLocaleString('de-DE')
-                    })
-                });
-
-                if (response.ok) {
-                    const participant = participants.find(p => p.id === id);
-                    if (participant) {
-                        participant.room = room;
-                        participant.building = building;
-                        participant.lastChanged = new Date().toLocaleString('de-DE');
-                    }
-                    updateDashboard();
-                    renderParticipants();
-                }
-            } catch (error) {
-                console.error('Fehler beim Aktualisieren des Zimmers:', error);
-            }
-        }
-
-        // Filter Funktion
-        function filterParticipants(filter) {
-            currentFilter = filter;
-            
-            // Filter-Button Styling
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            renderParticipants();
-        }
-
-        // Excel Upload
-        async function uploadExcel(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const formData = new FormData();
-            formData.append('excel', file);
-
-            try {
-                const response = await fetch('/api/upload-excel', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    participants = result.data;
-                    updateDashboard();
-                    renderParticipants();
-                    alert('Excel-Datei erfolgreich hochgeladen!');
+                    const result = await response.json();
+                    app.participants = result.data || [];
+                    app.extractBuildings();
+                    app.setupBuildingFilters();
+                    app.applyFilters();
+                    app.updateDashboard();
+                    app.showMainContent();
+                    
+                    alert('Demo-Daten erfolgreich geladen und in die Cloud synchronisiert!');
                 } else {
-                    alert('Fehler beim Hochladen der Excel-Datei');
+                    throw new Error('Demo-Daten konnten nicht geladen werden');
                 }
             } catch (error) {
-                console.error('Upload Fehler:', error);
-                alert('Upload fehlgeschlagen');
+                console.error('Error loading demo data:', error);
+                alert('Fehler beim Laden der Demo-Daten');
             }
-
-            // Input zurücksetzen für erneuten Upload
-            event.target.value = '';
         }
-
-        // Enter-Taste für Login
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && document.getElementById('loginForm').style.display !== 'none') {
-                login();
-            }
-        });
-
-        // Drag & Drop für Excel Upload
-        const uploadArea = document.querySelector('.upload-area');
-        if (uploadArea) {
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('dragover');
-            });
-
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('dragover');
-            });
-
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    document.getElementById('excelFile').files = files;
-                    uploadExcel({ target: { files: files } });
-                }
-            });
-        }
-
-        // Auto-Sync alle 3 Sekunden
-        setInterval(() => {
-            if (currentUser) {
-                loadParticipants();
-            }
-        }, 3000);
     </script>
 </body>
 </html>
